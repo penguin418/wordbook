@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Create Wordbook</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="container">
+    <div class="form-group">
+        <label for="question">Question</label>
+        <input type="text" class="form-control" id="question" placeholder="question">
+    </div>
+    <div class="form-group">
+        <label for="answer">Answer</label>
+        <input type="text" class="form-control" id="answer" placeholder="answer">
+    </div>
+    <button id="add-new" type="submit" class="btn btn-primary">add</button>
+    <div class="row">
+        <div class="col-6" id="qaList">
+            <div id="qa-template" class="d-none">
+                <div class="card-body">
+                    <h5 class="card-title">Question</h5>
+                    <p class="card-text">Answer</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    $("#add-new").on('click', function(e){
+        var q = $("#question").val()
+        var a = $("#answer").val()
+        var qa = $("#qa-template")
+            .clone()
+            .removeClass("d-none")
+            .attr("id", "new-qa")
+            .appendTo("#qaList")
+        qa.find(".card-title")[0].innerText = q
+        qa.find(".card-text")[0].innerText = a
+    })
+</script>
+</body>
+</html>
