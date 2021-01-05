@@ -6,41 +6,103 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+    <style>
+        .table td, .table th {
+            vertical-align: middle;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-    <div class="form-group">
-        <label for="question">Question</label>
-        <input type="text" class="form-control" id="question" placeholder="question">
-    </div>
-    <div class="form-group">
-        <label for="answer">Answer</label>
-        <input type="text" class="form-control" id="answer" placeholder="answer">
-    </div>
-    <button id="add-new" type="submit" class="btn btn-primary">add</button>
-    <div class="row">
-        <div class="col-6" id="qaList">
-            <div id="qa-template" class="d-none">
-                <div class="card-body">
-                    <h5 class="card-title">Question</h5>
-                    <p class="card-text">Answer</p>
+    <div class="row justify-content-center">
+        <h1>Create New Wordbook</h1>
+        <div class="col-8">
+            <div class="wordbook-creation-form sticky-top">
+                <div class="form-group">
+                    <label for="name">이름</label>
+                    <input type="text" class="form-control" id="name" name="name" placeholder="new wordbook">
                 </div>
+                <button id="add-wordbook" type="submit" class="btn btn-primary">새로운 학습 추가하기</button>
             </div>
+            <div class="qa-creation-form mt-3">
+                <div class="form-group">
+                    <label for="new-question">문제</label>
+                    <input type="text" class="form-control" id="new-question" placeholder="question">
+                    <label for="new-answer">정답</label>
+                    <textarea class="form-control" id="new-answer" placeholder="answer"></textarea>
+                </div>
+                <button id="add-qa" type="submit" class="btn btn-primary">문제/정답 추가하기</button>
+            </div>
+            <table class="table mt-3">
+                <thead>
+                    <tr class="bg-primary text-light">
+<!--                        <th>번호</th>-->
+                        <th>주제</th>
+                        <th>정답</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="qa-list">
+                <tr id="qa-template" class="d-none">
+<!--                    <td>0</td>-->
+                    <td class="qa-question" style="white-space:pre">Question</td>
+                    <td class="qa-answer" style="white-space:pre">Answer</td>
+                    <td style="float: right">
+                        <button type="button" class="update-qa btn btn-success" ><i class="fas fa-edit"></i></button>
+                        <button type="button" class="delete-qa btn btn-danger"><i class="far fa-trash-alt"></i></button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 <script>
+    $(document).ready(function() {
+        $("#add-wordbook").on('click', function (e) {
+            let form = new FormData()
+            form.append("name", $("#name").val())
+            $.each($(".qa"), function (index, qa) {
+                console.log(qa)
+                form.append("qaList[" + index + "].question", $(qa).find(".qa-question").text())
+                form.append("qaList[" + index + "].answer", $(qa).find(".qa-answer").text())
+            })
+            axios.post('/wordbook/create', form)
+                .then(function (res) {
+                    console.log(res)
+                })
+                .then(function (err) {
+                    console.log(err)
+                });
+        })
 
-    $("#add-new").on('click', function(e){
-        var q = $("#question").val()
-        var a = $("#answer").val()
-        var qa = $("#qa-template")
-            .clone()
-            .removeClass("d-none")
-            .attr("id", "new-qa")
-            .appendTo("#qaList")
-        qa.find(".card-title")[0].innerText = q
-        qa.find(".card-text")[0].innerText = a
+        $("#add-qa").on('click', function (e) {
+            let qa = $("#qa-template")
+                .clone()
+                .removeAttr("id", "qa-template")
+                .removeClass("d-none")
+                .addClass("qa")
+                .appendTo("#qa-list")
+            // qa.find(".qa-no").text($(".qa").length)
+            qa.find(".qa-question").text($("#new-question").val())
+            qa.find(".qa-answer").text($("#new-answer").val())
+            $("#new-question").val('').focus()
+            $("#new-answer").val('')
+        })
+    })
+    
+    $(document.body).on("click",".update-qa", function(){
+        var row = $(this).parents(".qa")
+        $("#new-question").val($(row).find(".qa-question").text()).focus()
+        $("#new-answer").val($(row).find(".qa-answer").text())
+        row.remove()
+    })
+    
+    $(document.body).on("click",".delete-qa", function(){
+        var row = $(this).parents(".qa")
+        row.remove()
     })
 </script>
 </body>

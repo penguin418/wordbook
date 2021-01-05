@@ -1,6 +1,7 @@
 package penguin.wordbook.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import penguin.wordbook.domain.Wordbook;
 import penguin.wordbook.repository.WordbookRepository;
 
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class WordbookService {
     private final WordbookRepository wordbookRepository;
 

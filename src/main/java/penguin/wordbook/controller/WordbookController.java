@@ -5,12 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
+import penguin.wordbook.domain.QA;
 import penguin.wordbook.domain.Wordbook;
 import penguin.wordbook.service.WordbookService;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,7 +31,18 @@ public class WordbookController {
     public String Home(Model model){return "home";}
 
     @GetMapping("/wordbook/create")
-    public String WordbookCreate(Model model){return "wordbook/create";}
+    public String WordbookCreateGet(Model model){return "wordbook/create";}
+    @PostMapping("/wordbook/create")
+    public String WordbookCreatePost(Wordbook wordbook) throws JsonProcessingException {
+        wordbookService.create(wordbook);
+        return "redirect:/wordbook/list";
+    }
+    @PostMapping("/test")
+    @ResponseBody
+    public Wordbook test(QA qa){
+        Wordbook wordbook = wordbookService.findOne(41L).get();
+        return wordbook;
+    }
 
     @GetMapping("/wordbook/list")
     public String WordbookList(Model model){
