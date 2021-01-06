@@ -30,6 +30,7 @@ class JpaWordbookRepositoryTest {
     QARepository qaRepository;
 
     @Test
+    @Commit
     void save() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -37,13 +38,13 @@ class JpaWordbookRepositoryTest {
         Wordbook wb1 = new Wordbook();
         wb1.setQaList(new ArrayList<>());
         // when
-//        wb1.getQaList().add(new QA("q1", "a1"));
+        wb1.getQaList().add(new QA("q1", "a1"));
         System.out.println(objectMapper.writeValueAsString(wb1));
         wordbookService.create(wb1);
 
         Wordbook wb2 = new Wordbook();
         wb2.setQaList(new ArrayList<>());
-//        wb2.getQaList().add(new QA("q2", "a2"));
+        wb2.getQaList().add(new QA("q2", "a2"));
         System.out.println(objectMapper.writeValueAsString(wb2));
         wordbookService.create(wb2);
 
@@ -65,5 +66,8 @@ class JpaWordbookRepositoryTest {
 
     @Test
     void delete() {
+        List<Wordbook> wbs = wordbookService.findAll();
+        Wordbook wb = wbs.get(0);
+        wordbookService.remove(wb);
     }
 }

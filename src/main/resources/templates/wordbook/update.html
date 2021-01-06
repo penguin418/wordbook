@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>단어장 생성하기</title>
+    <title th:text="'단어장 수정하기:' + ${wordbook.getName()}">단어장 수정하기: 이름 없음</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
@@ -17,7 +17,7 @@
 <body>
 <div class="container">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <h1>단어장 생성하기</h1>
+        <h1 th:text="'단어장 수정하기:' + ${wordbook.getName()}">단어장 수정하기: 이름 없음</h1>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -28,28 +28,28 @@
                     <a class="nav-link" href="/wordbook/list">홈</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/wordbook/create">새로운 단어장 만들기<span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href="/wordbook/create">새로운 단어장 만들기</a>
                 </li>
             </ul>
         </div>
     </nav>
     <div class="row justify-content-center">
         <div class="col-8">
-            <div class="wordbook-creation-form sticky-top">
+            <div class="wordbook-creation-form">
                 <div class="form-group">
                     <label for="name">이름</label>
-                    <input type="text" class="form-control" id="name" name="name" placeholder="새로운 단어장">
+                    <input type="text" class="form-control" id="name" name="name" placeholder="이름 없음" th:value="${wordbook.getName()}">
                     <label for="description">설명</label>
-                    <input type="text" class="form-control" id="description" name="description" placeholder="단어장 설명">
+                    <input type="text" class="form-control" id="description" name="description" placeholder="설명 없음" th:value="${wordbook.getDescription()}">
                 </div>
-                <button id="add-wordbook" type="submit" class="btn btn-primary">단어장 작성완료</button>
+                <button id="save-wordbook" type="submit" class="btn btn-primary">단어장 수정완료</button>
             </div>
             <div class="qa-creation-form mt-3">
                 <div class="form-group">
                     <label for="new-question">문제</label>
-                    <input type="text" class="form-control" id="new-question" placeholder="question">
+                    <input type="text" class="form-control" id="new-question" placeholder="문제">
                     <label for="new-answer">정답</label>
-                    <textarea class="form-control" id="new-answer" placeholder="answer"></textarea>
+                    <textarea class="form-control" id="new-answer" placeholder="정답"></textarea>
                 </div>
                 <button id="add-qa" type="submit" class="btn btn-primary">문제/정답 추가하기</button>
             </div>
@@ -63,6 +63,15 @@
                     </tr>
                 </thead>
                 <tbody id="qa-list">
+                    <tr class="qa" th:each="qa, i : ${qaList}" th:attr="data-qa-id=${qa.getId()}">
+                        <!--                    <td>0</td>-->
+                        <td class="qa-question" style="white-space:pre" th:text="${qa.getQuestion()}">Question</td>
+                        <td class="qa-answer" style="white-space:pre" th:text="${qa.getAnswer()}">Answer</td>
+                        <td style="float: right">
+                            <button type="button" class="update-qa btn btn-success" ><i class="fas fa-edit"></i></button>
+                            <button type="button" class="delete-qa btn btn-danger"><i class="far fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
                     <tr id="qa-template" class="d-none">
     <!--                    <td>0</td>-->
                         <td class="qa-question" style="white-space:pre">Question</td>
@@ -78,27 +87,27 @@
     </div>
 </div>
 <script>
-    $(document).ready(function (message) {
-        $("#add-wordbook").on('click', function (e) {
+    let id = [[${wordbook.getId()}]]
+    $(document).ready(function() {
+        $("#save-wordbook").on('click', function (e) {
             let form = new FormData()
+            form.append("id", id )
             form.append("name", $("#name").val())
             form.append("description", $("#description").val())
-            var counter = 0
             $.each($(".qa"), function (index, qa) {
+                console.log(qa)
+                if($(qa).data("qa-id"))
+                    form.append("qaList[" + index + "].id", $(qa).data("qa-id"))
+                form.append("qaList[" + index + "].wordbook_id", id)
                 form.append("qaList[" + index + "].question", $(qa).find(".qa-question").text())
                 form.append("qaList[" + index + "].answer", $(qa).find(".qa-answer").text())
-                counter += 1
             })
-            if (counter < 1){
-                alert("1개 이상의 문제 or 단어를 추가해야 합니다")
-                return
-            }
-            axios.post('/wordbook/create', form)
+            axios.post('/wordbook/update', form)
                 .then(function (res) {
-                    window.location = "/wordbook/list"
+                    console.log(res)
                 })
-                .catch(function (err) {
-                    alert('서버오류', err)
+                .then(function (err) {
+                    console.log(err)
                 });
         })
 
@@ -110,6 +119,10 @@
                 .addClass("qa")
                 .appendTo("#qa-list")
             // qa.find(".qa-no").text($(".qa").length)
+            if ($("#qa-id").data("qa-id")) {
+                qa.data("qa-id", $("#add-qa").data("qa-id"))
+                qa.removeAttr("qa-id")
+            }
             qa.find(".qa-question").text($("#new-question").val())
             qa.find(".qa-answer").text($("#new-answer").val())
             $("#new-question").val('').focus()
@@ -121,6 +134,7 @@
         var row = $(this).parents(".qa")
         $("#new-question").val($(row).find(".qa-question").text()).focus()
         $("#new-answer").val($(row).find(".qa-answer").text())
+        $("#add-qa").data("qa-id", $(row).data("qa-id"))
         row.remove()
     })
     

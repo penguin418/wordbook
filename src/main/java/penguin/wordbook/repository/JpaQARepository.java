@@ -27,7 +27,7 @@ public class JpaQARepository implements QARepository{
 
     @Override
     public boolean delete(QA qa) {
-        int resultCount = em.createQuery("delete from qa q where q.id=:id", QA.class)
+        int resultCount = em.createQuery("delete from qa q where q.id=:id")
                 .setParameter("id", qa.getId())
                 .executeUpdate();
         return resultCount == 1;

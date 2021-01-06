@@ -7,32 +7,40 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/67f60ca045.js" crossorigin="anonymous"></script>
 </head>
 <body>
 <div class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <h1>단어장 서비스</h1>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/wordbook/list">홈<span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/wordbook/create">새로운 단어장 만들기</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
     <div class="row justify-content-center">
-        <h1>wordbook list</h1>
         <div class="col-8">
-            <div class="list-group" th:each="book, i: ${wordbooks}">
-                <a href="/wordbook/create" th:if="${i.index == 0}" class="list-group-item">
-                    <h5>생성하기</h5>
+            <div class="list-group" >
+                <a href="/wordbook/create" class="list-group-item">
+                    <h5>새로운 단어장 만들기</h5>
                 </a>
-                <a th:href="@{/wordbook/{id} (id=${book.getId()})}" class="list-group-item">
+                <a th:each="book, i: ${wordbooks}" th:href="@{/wordbook/{id} (id=${book.getId()})}" class="list-group-item">
                     <h5 th:if="${book.getName()}" th:text="${book.getName()}"></h5>
                     <h5 th:if="! ${book.getName()}">제목없음</h5>
                 </a>
-                <script>
-                    var value =  [[${book}]]
-                </script>
             </div>
         </div>
     </div>
 </div>
 </body>
-<script>
-    $(document).ready(function() {
-        var value = [[${wordbooks}]]
-        // console.log(value)
-    })
-</script>
 </html>

@@ -28,8 +28,13 @@ public class WordbookService {
         return wordbookRepository.findAll();
     }
 
+    public boolean update(Wordbook wordbook) {return wordbookRepository.update(wordbook);}
+
     public boolean remove(Wordbook wordbook){
         return wordbookRepository.delete(wordbook);
     }
 
+    public boolean removeById(Long id){
+        return wordbookRepository.deleteById(id);
+    }
 }
