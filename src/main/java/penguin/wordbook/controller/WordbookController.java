@@ -2,6 +2,7 @@ package penguin.wordbook.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,13 +21,9 @@ import java.util.stream.Stream;
 import static java.lang.Long.parseLong;
 
 @Controller
+@AllArgsConstructor
 public class WordbookController {
     private final WordbookService wordbookService;
-
-    @Autowired
-    public WordbookController(WordbookService wordbookService) {
-        this.wordbookService = wordbookService;
-    }
 
     @GetMapping("/")
     public String Home(Model model){return "home";}

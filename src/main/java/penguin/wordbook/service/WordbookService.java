@@ -1,8 +1,10 @@
 package penguin.wordbook.service;
 
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import penguin.wordbook.domain.Wordbook;
+import penguin.wordbook.repository.QARepository;
 import penguin.wordbook.repository.WordbookRepository;
 
 import java.util.List;
@@ -10,13 +12,11 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@AllArgsConstructor
 public class WordbookService {
+
+    private final QARepository qaRepository;
     private final WordbookRepository wordbookRepository;
-
-
-    public WordbookService(WordbookRepository wordbookRepository) {
-        this.wordbookRepository = wordbookRepository;
-    }
 
     public Wordbook create(Wordbook wordbook){
         return wordbookRepository.save(wordbook);
@@ -28,13 +28,15 @@ public class WordbookService {
         return wordbookRepository.findAll();
     }
 
-    public boolean update(Wordbook wordbook) {return wordbookRepository.update(wordbook);}
-
-    public boolean remove(Wordbook wordbook){
-        return wordbookRepository.delete(wordbook);
+    public void update(Wordbook wordbook) {
+        wordbookRepository.save(wordbook);
     }
 
-    public boolean removeById(Long id){
-        return wordbookRepository.deleteById(id);
+    public void remove(Wordbook wordbook){
+        wordbookRepository.delete(wordbook);
+    }
+
+    public void removeById(Long id){
+        wordbookRepository.deleteById(id);
     }
 }
