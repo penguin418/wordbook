@@ -22,7 +22,8 @@ class JpaWordbookRepositoryTest {
 
     @Autowired
     WordbookService wordbookService;
-    @Qualifier("jpaWordbookRepository")
+
+    @Qualifier("wordbookRepository")
     @Autowired
     WordbookRepository wordbookRepository;
 
