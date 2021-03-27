@@ -12,6 +12,12 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	mapstructVersion = "1.4.2.Final"
+	lombokVersion = "1.18.16"
+	lombokMapstructBindingVersion = "0.2.0"
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -20,6 +26,10 @@ dependencies {
 	runtimeOnly 'com.h2database:h2'
 	implementation group: 'org.mindrot', name: 'jbcrypt', version: '0.3m'
 
+	compileOnly "org.projectlombok:lombok:${lombokVersion}"
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}", "org.projectlombok:lombok:${lombokVersion}"
+	testImplementation 'junit:junit:4.13.1'
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}", "org.projectlombok:lombok:${lombokVersion}", "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
 }
 
 test {
