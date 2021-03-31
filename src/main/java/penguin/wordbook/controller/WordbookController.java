@@ -1,103 +1,54 @@
 package penguin.wordbook.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import penguin.wordbook.domain.QA;
-import penguin.wordbook.domain.Wordbook;
-import penguin.wordbook.service.WordbookService;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.lang.Long.parseLong;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
-@AllArgsConstructor
 public class WordbookController {
-    private final WordbookService wordbookService;
-
+    /**
+     * 홈
+     * @return 홈 페이지
+     */
     @GetMapping("/")
-    public String Home(Model model){return "home";}
-
-    @GetMapping("/wordbook/create")
-    public String GetWordbookCreate(Model model){
-        return "wordbook/create";
+    public String home() {
+        return "index";
     }
 
-    @PostMapping("/wordbook/create")
-    public String PostWordbookCreate(Wordbook wordbook) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        System.out.println(objectMapper.writeValueAsString(wordbook));
-
-        Wordbook newBook = wordbookService.create(wordbook);
-        return "redirect:/wordbook/" + newBook.getId();
+    /**
+     * wordbook 생성
+     * @return wordbook 생성 페이지
+     */
+    @GetMapping("/wordbooks/create")
+    public String newWordbook() {
+        return "wordbooks/create";
     }
 
-    @GetMapping("/wordbook/{id}/update")
-    public String GetWordbookUpdate(@PathVariable(value="id") String id,Model model){
-        try{
-            Long wordbookId = Long.parseLong(id);
-            Wordbook wordbook = wordbookService.findOne(wordbookId)
-                    .orElseThrow(NoSuchElementException::new);
-            model.addAttribute("wordbook", wordbook);
-            model.addAttribute("qaList", wordbook.getQaList());
-            return "wordbook/update";
-        }catch (NumberFormatException | NoSuchElementException e){
-            return "error/404";
-        }
+    /**
+     * wordbook 전체 조회
+     * @return wordbook 전체 조회 페이지
+     */
+    @GetMapping("/wordbooks/list")
+    public String wordbookList() {
+        return "wordbooks/list";
     }
 
-    @PostMapping("/wordbook/update")
-    public String PostWordbookUpdate(Wordbook wordbook) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        System.out.println(objectMapper.writeValueAsString(wordbook));
-
-
-        wordbookService.update(wordbook);
-        return "redirect:/wordbook/list";
+    /**
+     * wordbook 조회
+     * @return wordbook 조회 페이지
+     */
+    @GetMapping("/wordbooks/{id}")
+    public String wordbookItem(@PathVariable(value = "id") Long id) {
+        return "wordbooks/item";
     }
 
-    @GetMapping("/wordbook/list")
-    public String GetWordbookList(Model model){
-        List<Wordbook> wordbookList = wordbookService.findAll();
-        model.addAttribute("wordbooks", wordbookList);
-        return "wordbook/list";
-    }
-
-    @GetMapping("/wordbook/{id}")
-    public String GetWordbook(@PathVariable(value="id") String id, Model model) {
-        try{
-            Long wordbookId = Long.parseLong(id);
-            Wordbook wordbook = wordbookService.findOne(wordbookId)
-                    .orElseThrow(NoSuchElementException::new);
-            model.addAttribute("wordbook", wordbook);
-            model.addAttribute("qaList", wordbook.getQaList());
-            return "wordbook/item";
-        }catch (NumberFormatException | NoSuchElementException e){
-            return "error/404";
-        }
-    }
-    @DeleteMapping("/wordbook/{id}")
-    @ResponseBody
-    public String DeleteWordbook(@PathVariable(value="id") String id, Model model) {
-        try{
-            Long wordbookId = Long.parseLong(id);
-            wordbookService.removeById(wordbookId);
-            return "success";
-        }catch (NumberFormatException e){
-            return "500";
-        }catch (Exception e){
-            System.out.println(e);
-            return "404";
-        }
+    /**
+     * wordbook 갱신
+     * @return
+     */
+    @GetMapping("/wordbooks/{id}/update")
+    public String wordbookItemDetail(@PathVariable(value = "id") Long id) {
+        return "wordbooks/update";
     }
 }
