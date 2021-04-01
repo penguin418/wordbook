@@ -7,7 +7,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import penguin.wordbook.domain.Wordbook;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN, uses = {QAMapper.class})
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN, uses = {QAMapper.class, AccountMapper.class})
 public interface WordbookMapper {
 
     @Mapping(target = "wordbookId", ignore = true)
