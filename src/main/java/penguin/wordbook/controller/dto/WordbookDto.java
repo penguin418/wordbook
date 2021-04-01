@@ -1,6 +1,7 @@
 package penguin.wordbook.controller.dto;
 
 import static penguin.wordbook.controller.dto.QADto.*;
+import static penguin.wordbook.controller.dto.AccountDto.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,8 @@ public class WordbookDto {
     @AllArgsConstructor
     @Builder
     public static class WordbookCreateDto {
+
+        private AccountInfoDto account;
 
         private String name;
 
@@ -46,6 +49,8 @@ public class WordbookDto {
 
         private Long id;
 
+        private AccountInfoDto account;
+
         private String name;
 
         private String description;
@@ -65,6 +70,8 @@ public class WordbookDto {
 
         private Long id;
 
+        private AccountInfoDto account;
+
         private String name;
 
         private String description;
@@ -80,6 +87,8 @@ public class WordbookDto {
     public static class WordbookItemDto {
 
         private Long id;
+
+        private AccountInfoDto account;
 
         private String name;
 
