@@ -21,14 +21,23 @@ import java.util.Map;
 public class Wordbook {
 
     @Id
-    @Column(name = "wordbook_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long wordbookId;
 
     private String name;
 
     private String description;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "wordbook")
     private List<QA> qaList = new ArrayList<>();
+
+    public void addQA(QA qa){
+        qaList.add(qa);
+        qa.setWordbook(this);
+    }
+
+    public void removeQA(QA qa){
+        qaList.remove(qa);
+        qa.setWordbook(null);
+    }
 }

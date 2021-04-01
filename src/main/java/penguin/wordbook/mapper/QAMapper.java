@@ -10,10 +10,14 @@ import penguin.wordbook.domain.QA;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN)
 public interface QAMapper {
 
-    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "qaId", ignore = true)
+    @Mapping(target = "wordbook", ignore = true)
     public QA map(QACreateDto dto);
 
+    @Mapping(source = "id", target = "qaId")
+    @Mapping(target = "wordbook", ignore = true)
     public QA map(QAUpdateDto dto);
 
+    @Mapping(source = "qaId", target = "id")
     public QAResponseDto map(QA entity);
 }

@@ -125,8 +125,7 @@ const wordbookService = (function () {
         addQA(question, answer, id = 0) {
             this.qaList.push({
                 'question': question.toString(),
-                'answer': answer.toString(),
-                'id': id.toString()
+                'answer': answer.toString()
             })
         }
 
@@ -148,7 +147,7 @@ const wordbookService = (function () {
                 body: JSON.stringify({
                     name: this.name,
                     description: this.description,
-                    qaList: this.qaList
+                    qa_list: this.qaList
                 }),
             })
         }
@@ -182,7 +181,7 @@ const wordbookService = (function () {
                     this.id = data.id
                     this.name = data.name
                     this.description = data.description
-                    this.qaList = data.qaList
+                    this.qaList = data.qa_list
                     super.endProcessing()
                 })
         }
@@ -203,7 +202,7 @@ const wordbookService = (function () {
                     id: this.id,
                     name: this.name,
                     description: this.description,
-                    qaList: this.qaList
+                    qa_list: this.qaList
                 }),
             })
         }

@@ -15,11 +15,12 @@ import javax.persistence.*;
 public class QA {
 
     @Id
-    @Column(name = "qa_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long qaId;
 
-    private Long wordbook_id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "wordbook_id", foreignKey = @ForeignKey(name = "fk_qa_workbook"))
+    private Wordbook wordbook;
 
     private String question;
 
