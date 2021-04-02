@@ -24,6 +24,10 @@ public class Wordbook {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long wordbookId;
 
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
+
     private String name;
 
     private String description;
