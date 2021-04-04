@@ -3,6 +3,7 @@ package penguin.wordbook.controller;
 import static penguin.wordbook.controller.dto.AccountDto.*;
 
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -127,36 +128,35 @@ public class AccountApiController {
 
     /**
      * 업데이트
-     * @param authentication {Authentication} 인증 객체
      * @param accountUpdateDto {AccountUpdateDto} 업데이트 할 내용
      * @return ResponseEntity 성공 시: AccountResponseDto, 실패 시: badRequest
      */
     @PutMapping("/api/accounts/my")
-    public ResponseEntity<AccountInfoDto> update(@RequestBody AccountUpdateDto accountUpdateDto,
-                                                 Authentication authentication) {
-        UserDetail userDetails = (UserDetail)authentication.getPrincipal();
-
-        final String password = userDetails.getPassword();
-        final String passwordConfirm = accountUpdateDto.getPassword();
-        final String newPassword = accountUpdateDto.getNewPassword();
-
-        // 로그인된 사용자의 행동이 아님 (현재 비밀번호 모름)
-        if (! password.equals(passwordConfirm)) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        // 만약 비밀번호를 업데이트하는 경우 업데이트 시켜줌
-        if (newPassword != null && !newPassword.equals("")){
-            accountUpdateDto.setPassword(passwordEncoder.encode(newPassword));
-        }
-
+    public ResponseEntity<AccountInfoDto> update(@RequestBody AccountUpdateDto accountUpdateDto) {
+        final UsernamePasswordAuthenticationToken token
+                = new UsernamePasswordAuthenticationToken(accountUpdateDto.getEmail(), accountUpdateDto.getPassword());
         try {
+            // 비밀번호 검사
+            authenticationManager.authenticate(token);
+
+            // 만약 비밀번호를 업데이트하는 경우 업데이트 시켜줌
+            final String newPassword = accountUpdateDto.getNewPassword();
+            if (newPassword != null && !newPassword.equals("")) {
+                accountUpdateDto.setPassword(passwordEncoder.encode(newPassword));
+            }
+
+            // 갱신
             AccountInfoDto responseDto = accountService.update(accountUpdateDto);
             return ResponseEntity.ok(responseDto);
+
+        }  catch (BadCredentialsException e) {
+            // 로그인된 사용자의 행동이 아님 (현재 비밀번호 모름)
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } catch (EntityExistsException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
     }
-
-
 }
