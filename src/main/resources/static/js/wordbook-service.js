@@ -2,7 +2,11 @@
  * @author penguin penguin418@naver.com
  * @version 0.6
  * @file wordbook 을 관리하고 서버와 통신하기 위한 서비스입니다
+ * @requires jquery cookie
  */
+if (window.wordbookService) {
+    console.log('duplicated import')
+}
 const wordbookService = (function () {
 
     const URLs = (function () {
@@ -21,6 +25,15 @@ const wordbookService = (function () {
             },
             wordbookItemDetail: (id) => {
                 return '/wordbooks/' + parseInt(id) + '/update'
+            },
+            newAccount: () => {
+                return '/accounts/create'
+            },
+            loginAccount: () => {
+                return '/accounts/login'
+            },
+            accountDetail: () => {
+                return '/accounts/detail'
             }
         }
     })()
@@ -34,7 +47,7 @@ const wordbookService = (function () {
 
         /**
          * 프로세스 상태를 초기화 함
-         * isProcessing {boolean} true: 프로세스가 끝난 상태, false: 프로세스가 끝나고 함수까지 실행된 상태
+         * state {STATUS} READY: 프로세스가 끝난 상태, LOADING: 작동중, SUCCESS: 성공 후 대기, FAILED: 실패 후 대기
          * onFinishedFunction {function} 실행될 함수
          * @this Notifiable
          */
@@ -175,7 +188,7 @@ const wordbookService = (function () {
             super.startProcessing()
             return fetch('/api/wordbooks/' + id, {
                 method: 'GET',
-            }).then(response => response.json())
+            }).then((response) => response.json())
                 .then(data => {
                     console.log(data)
                     this.id = data.id
@@ -215,7 +228,7 @@ const wordbookService = (function () {
         deleteFromServer() {
             return fetch('/api/wordbooks/' + this.id, {
                 method: 'DELETE',
-            }).then(response => console.log(response))
+            }).then((response) => console.log(response))
         }
     }
 
@@ -243,7 +256,7 @@ const wordbookService = (function () {
             super.startProcessing()
             return fetch('/api/wordbooks', {
                 method: "GET",
-            }).then(response => response.json())
+            }).then((response) => response.json())
                 .then((data) => {
                     this.contents = data.contents
                     this.length = data.length
@@ -253,11 +266,121 @@ const wordbookService = (function () {
         }
     }
 
+    const getAccount = function () {
+        if (accountInstance === undefined) {
+            accountInstance = new AccountClass()
+        }
+        return accountInstance
+    }
+    let accountInstance
+    const AccountClass = class extends Notifiable {
+
+        constructor() {
+            super()
+            this.id = ''
+            this.nickname = ''
+            this.email = ''
+            this.LOGGED_IN = 'WORDBOOK_LOGGED_IN'
+        }
+
+        isLoggedIn() {
+            const token = CookieUtil.getCookie(this.LOGGED_IN)
+            console.log('cookie=', token)
+            return (typeof token !== "undefined")
+        }
+
+        create(nickname, email, password) {
+            super.startProcessing()
+            return fetch('/api/accounts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    nickname, email, password
+                })
+            }).then((response) => response.json())
+                .then((data) => {
+                    super.endProcessing()
+                })
+        }
+
+        login(email, password) {
+            super.startProcessing()
+            return fetch('/api/accounts/login', {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email: email.toString(),
+                    password: password.toString()
+                }),
+            }).then((response) => {
+                if (!response.ok) {
+                    console.warn(response)
+                    throw new Error(`${response.statusText}`)
+                }
+                return response.json()
+            }).then((data) => {
+                console.log(data)
+                this.id = data.account_id
+                this.nickname = data.nickname
+                this.email = data.email
+                CookieUtil.setCookie(this.LOGGED_IN, true)
+                super.endProcessing()
+            })
+        }
+
+
+        logout() {
+            super.startProcessing()
+            return fetch('/api/accounts/logout', {
+                method: 'POST'
+            }).then(() => {
+                CookieUtil.deleteCookie(this.LOGGED_IN)
+                super.endProcessing()
+            })
+        }
+
+        getMyAccount() {
+            super.startProcessing()
+            return fetch('/api/accounts/my', {
+                method: 'GET'
+            }).then((response) => response.json())
+                .then((data) => {
+                    console.log(data)
+                    this.id = data.account_id
+                    this.nickname = data.nickname
+                    this.email = data.email
+                    super.endProcessing()
+                })
+        }
+
+        update(nickname, email, password, new_password) {
+            super.startProcessing()
+            return fetch('/api/accounts/my', {
+                method: 'PUT',
+                body: JSON.stringify({
+                    nickname, email, password, new_password
+                })
+            }).then((response) => response.json())
+                .then((data) => {
+                    console.log(data)
+                    this.id = data.account_id
+                    this.nickname = data.nickname
+                    this.email = data.email
+                    super.endProcessing()
+                })
+        }
+    }
+
     return {
         URLs,
         NewWordbook,
         CurrentWordbook,
-        Wordbooks
+        Wordbooks,
+        getAccount
     }
 })();
 
@@ -270,3 +393,4 @@ function EmptyWordbookException() {
 EmptyWordbookException.prototype.toString = function () {
     return 'At least one QA must be included'
 }
+
