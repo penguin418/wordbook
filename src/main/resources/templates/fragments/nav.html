@@ -21,11 +21,28 @@
             </li>
         </ul>
 
-        <li class="navbar-nav border-0 ml-auto">
-            <a class="nav-link" id="profile" href="#">내 단어장</a>
-        </li>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" id="profile" href="#">내 단어장</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="logout" href="#">로그아웃</a>
+            </li>
+        </ul>
     </div>
     <script>
+        const onUI = function () {
+            console.log('event onUI')
+            const {URLs, getAccount} = wordbookService
+            const account = getAccount()
+            if (!account.isLoggedIn()) {
+                console.log('log outed ', account.isLoggedIn())
+                $('#logout').css('display', 'none')
+            }
+        }
+        window.addEventListener('ui-ready', onUI)
+        console.log('event registered')
+
         $(document.body).on("click", "#profile", function () {
             const {URLs, getAccount} = wordbookService
             const account = getAccount()
@@ -34,6 +51,12 @@
             } else {
                 location.href = URLs.loginAccount()
             }
+        })
+
+        $(document.body).on("click", "#logout", function () {
+            const {URLs, getAccount} = wordbookService
+            const account = getAccount()
+            account.logout()
         })
     </script>
 </nav>
