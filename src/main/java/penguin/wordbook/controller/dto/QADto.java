@@ -22,7 +22,7 @@ public class QADto {
     @AllArgsConstructor @Builder
     public static class QAUpdateDto{
 
-        private Long id;
+        private Long qaId;
 
         private String question;
 
@@ -34,7 +34,7 @@ public class QADto {
     @AllArgsConstructor @Builder
     public static class QAResponseDto{
 
-        private Long id;
+        private Long qaId;
 
         private String question;
 

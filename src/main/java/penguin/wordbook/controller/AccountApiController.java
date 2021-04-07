@@ -1,6 +1,7 @@
 package penguin.wordbook.controller;
 
 import static penguin.wordbook.controller.dto.AccountDto.*;
+import static penguin.wordbook.controller.dto.WordbookDto.*;
 
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import penguin.wordbook.config.UserDetail;
 import penguin.wordbook.service.AccountService;
+import penguin.wordbook.service.WordbookService;
 import penguin.wordbook.util.CookieUtil;
 import penguin.wordbook.util.JwtTokenUtil;
 import penguin.wordbook.util.RedisUtil;
@@ -23,6 +25,7 @@ import javax.persistence.EntityExistsException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * account 관련 rest api 지원
@@ -32,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 @AllArgsConstructor
 public class AccountApiController {
     private final AccountService accountService;
+    private final WordbookService wordbookService;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtil jwtTokenUtil;
@@ -131,18 +135,29 @@ public class AccountApiController {
     public ResponseEntity<AccountInfoDto> update(@RequestBody AccountUpdateDto accountUpdateDto) {
         final UsernamePasswordAuthenticationToken token
                 = new UsernamePasswordAuthenticationToken(accountUpdateDto.getEmail(), accountUpdateDto.getPassword());
-            // 비밀번호 검사
-            authenticationManager.authenticate(token);
+        // 비밀번호 검사
+        authenticationManager.authenticate(token);
 
-            // 만약 비밀번호를 업데이트하는 경우 업데이트 시켜줌
-            final String newPassword = accountUpdateDto.getNewPassword();
-            if (newPassword != null && !newPassword.equals("")) {
-                accountUpdateDto.setPassword(passwordEncoder.encode(newPassword));
-            }
+        // 만약 비밀번호를 업데이트하는 경우 업데이트 시켜줌
+        final String newPassword = accountUpdateDto.getNewPassword();
+        if (newPassword != null && !newPassword.equals("")) {
+            accountUpdateDto.setPassword(passwordEncoder.encode(newPassword));
+        }
 
-            // 갱신
-            AccountInfoDto responseDto = accountService.update(accountUpdateDto);
-            return ResponseEntity.ok(responseDto);
+        // 갱신
+        AccountInfoDto responseDto = accountService.update(accountUpdateDto);
+        return ResponseEntity.ok(responseDto);
+    }
+
+    /**
+     * 나의 wordbook 가져오기
+     */
+    @GetMapping("/api/accounts/my/wordbooks")
+    public ResponseEntity<MyWordbookResultSetDto> getMyWordbookList(Authentication authentication) {
+        UserDetail userDetail = (UserDetail) authentication.getPrincipal();
+        List<WordbookItemDto> results = wordbookService.findByAccountId(userDetail.getAccountId());
+        MyWordbookResultSetDto resultSet = new MyWordbookResultSetDto((long) results.size(), 1L, results);
+        return ResponseEntity.ok(resultSet);
     }
 
     /**

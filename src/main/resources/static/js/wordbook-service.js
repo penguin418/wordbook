@@ -145,10 +145,21 @@ const wordbookService = (function () {
 
         constructor() {
             super()
-            this.id = 0
+            this.account = {}
+            this.wordbookId = 0
             this.name = ''
             this.description = ''
             this.qaList = []
+        }
+
+        setAccount(account) {
+            this.account.account_id = account.account_id
+            this.account.nickname = account.nickname
+            this.account.email = account.email
+        }
+
+        getAccount(){
+            return this.account
         }
 
         /**
@@ -160,6 +171,10 @@ const wordbookService = (function () {
             this.name = newName
         }
 
+        getName(){
+            return this.name
+        }
+
         /**
          * wordbook description 을 지정합니다
          * @Param newDescription {string} 새로운 wordbook description
@@ -167,6 +182,10 @@ const wordbookService = (function () {
          */
         setDescription(newDescription) {
             this.description = newDescription
+        }
+
+        getDescription(){
+            return this.description
         }
 
         /**
@@ -182,6 +201,10 @@ const wordbookService = (function () {
             })
         }
 
+        getQAList(){
+            return this.qaList
+        }
+
         /**
          * 서버에 현재 wordbook을 저장합니다
          * @this NewWordbook 현재 새로 만들어진 wordbook
@@ -192,6 +215,7 @@ const wordbookService = (function () {
             if (this.qaList.length < 1) {
                 throw new EmptyWordbookException()
             }
+            super.reportProcessing()
             return fetch('/api/wordbooks', {
                 method: "POST",
                 headers: {
@@ -200,8 +224,20 @@ const wordbookService = (function () {
                 body: JSON.stringify({
                     name: this.name,
                     description: this.description,
-                    qa_list: this.qaList
+                    qa_list: this.qaList,
+                    account: this.account
                 }),
+            }).then((response) => {
+                if (!response.ok) {
+                    throw new Error(response.statusText)
+                }
+                return response.json()
+            }).then(data => {
+                console.log(data)
+                super.reportSuccess()
+            }).catch((error) => {
+                console.log(error)
+                super.reportFail()
             })
         }
     }
@@ -212,8 +248,6 @@ const wordbookService = (function () {
      * @classdesc 각 변수를 채운뒤, saveToServer() 메소드를 통해 서버에 저장합니다
      */
     const CurrentWordbook = class extends NewWordbook {
-        loading = false
-        onLoadFunction = null
 
         /**
          * 서버에서 하나의 wordbook을 찾아옵니다
@@ -235,10 +269,13 @@ const wordbookService = (function () {
                 return response.json()
             }).then(data => {
                 console.log(data)
-                this.id = data.id
+                this.wordbookId = data.wordbook_id
                 this.name = data.name
                 this.description = data.description
                 this.qaList = data.qa_list
+                this.account.account_id = data.account.account_id
+                this.account.nickname = data.account.nickname
+                this.account.email = data.account.email
                 super.reportSuccess()
             }).catch((error) => {
                 console.log(error)
@@ -259,7 +296,7 @@ const wordbookService = (function () {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    id: this.id,
+                    wordbook_id: this.wordbookId,
                     name: this.name,
                     description: this.description,
                     qa_list: this.qaList
@@ -273,7 +310,7 @@ const wordbookService = (function () {
          * @returns {Promise<void>} 다음 동작을 수행할 수 있습니다
          */
         deleteFromServer() {
-            return fetch('/api/wordbooks/' + this.id, {
+            return fetch('/api/wordbooks/' + this.wordbookId, {
                 method: 'DELETE',
             }).then((response) => console.log(response))
         }
@@ -308,22 +345,66 @@ const wordbookService = (function () {
                     throw new Error(response.statusText)
                 }
                 return response.json()
+            }).then((data) => {
+                this.contents = data.contents
+                this.length = data.length
+                this.page = data.page
+                super.reportSuccess()
+            }).catch((error) => {
+                console.log(error)
+                super.reportFail()
             })
-                .then((data) => {
-                    this.contents = data.contents
-                    this.length = data.length
-                    this.page = data.page
-                    super.reportSuccess()
-                }).catch((error) => {
-                    console.log(error)
-                    super.reportFail()
-                })
         }
+
     }
 
+    /**
+     * 나의 wordbooks 를 관리하는 클래스
+     * @class
+     * @classdesc 나의 wordbooks 를 관리합니다
+     */
+    const MyWordbooks = class extends Wordbooks{
+        /**
+         * 나의 wordbooks 를 조회합니다
+         * @this MyWordbooks
+         * @returns {Promise<void>}
+         */
+        findMyWordbooks() {
+            console.log('find my wordbook')
+            super.reportProcessing()
+            return fetch('/api/accounts/my/wordbooks', {
+                method: "GET",
+            }).then((response) => {
+                if (!response.ok) {
+                    throw new Error(response.statusText)
+                }
+                return response.json()
+            }).then((data) => {
+                this.contents = data.contents
+                this.length = data.length
+                this.page = data.page
+                super.reportSuccess()
+            }).catch((error) => {
+                console.log(error)
+                super.reportFail()
+            })
+        }
+    }
+    /**
+     * Account 인스턴스 가져옴
+     * - 싱글턴 구현
+     * - 매 페이지를 로드할때 Account 를 초기화하며,
+     *   이후 페이지 내에서 공유하기 위해 사용됨
+     * - 처음 초기화할 때 정보를 초기화함
+     * @returns {AccountClass}
+     * FIXME: 로그인 확인하고 getMyAccount는 constructor로 옮기기로
+     */
     const getAccount = function () {
         if (accountInstance === undefined) {
             accountInstance = new AccountClass()
+            if (accountInstance.isLoggedIn()) {
+                accountInstance.getMyAccount()
+            }
         }
         return accountInstance
     }
@@ -332,18 +413,32 @@ const wordbookService = (function () {
 
         constructor() {
             super()
-            this.id = ''
+            this.accountId = ''
             this.nickname = ''
             this.email = ''
             this.LOGGED_IN = 'WORDBOOK_LOGGED_IN'
         }
 
+        /**
+         * 로그인 여부를 확인함
+         * - 쿠키에 `REFRESH_TOKEN`이 존재하는 여부로 판단
+         * - REFRESH_TOKEN이 있으면 로그인 갱신이 되므로 REFRESH_TOKEN이
+         *   로그인 확인 수단으로 적절함
+         * @returns {boolean}
+         */
         isLoggedIn() {
-            const token = CookieUtil.getCookie(this.LOGGED_IN)
-            console.log('cookie=', token)
+            const token = CookieUtil.getCookie('REFRESH_TOKEN')
             return (typeof token !== "undefined")
         }
 
+        /**
+         * 가입
+         * @param nickname {string} 이름
+         * @param email {string} 이메일
+         * @param password {string} 패스워드
+         * @returns {Promise<void>}
+         * TODO: 닉네임 중복과 email 중복을 구분해서 처리하기 위해 report 메소드 개선 예정
+         */
         create(nickname, email, password) {
             super.reportProcessing()
             return fetch('/api/accounts', {
@@ -367,6 +462,12 @@ const wordbookService = (function () {
             })
         }
 
+        /**
+         * 로그인
+         * @param email {string} 이메일
+         * @param password {string} 패스워드
+         * @returns {Promise<void>}
+         */
         login(email, password) {
             super.reportProcessing()
             return fetch('/api/accounts/login', {
@@ -386,10 +487,10 @@ const wordbookService = (function () {
                 return response.json()
             }).then((data) => {
                 console.log(data)
-                this.id = data.account_id
+                this.accountId = data.account_id
                 this.nickname = data.nickname
                 this.email = data.email
-                CookieUtil.setCookie(this.LOGGED_IN, true)
+                CookieUtil.setCookie(this.LOGGED_IN, JSON.stringify(data))
                 super.reportSuccess()
             }).catch((error) => {
                 console.log(error)
@@ -397,7 +498,10 @@ const wordbookService = (function () {
             })
         }
 
-
+        /**
+         * 로그아웃
+         * @returns {Promise<void>}
+         */
         logout() {
             super.reportProcessing()
             return fetch('/api/accounts/logout', {
@@ -408,29 +512,52 @@ const wordbookService = (function () {
             })
         }
 
+        /**
+         * 내 정보
+         */
         getMyAccount() {
             super.reportProcessing()
-            return fetch('/api/accounts/my', {
-                method: 'GET'
-
-            }).then((response) => {
-                if (!response.ok) {
-                    console.warn(response)
-                    throw new Error(response.statusText)
-                }
-                return response.json()
-            }).then((data) => {
-                console.log(data)
-                this.id = data.account_id
+            // return fetch('/api/accounts/my', {
+            //     method: 'GET'
+            //
+            // }).then((response) => {
+            //     if (!response.ok) {
+            //         console.warn(response)
+            //         throw new Error(response.statusText)
+            //     }
+            //     return response.json()
+            // }).then((data) => {
+            //     console.log(data)
+            //     this.accountId = data.accountId
+            //     this.nickname = data.nickname
+            //     this.email = data.email
+            //     super.reportSuccess()
+            // }).catch((error) => {
+            //     console.log(error)
+            //     super.reportFail()
+            // })
+            try {
+                const data = JSON.parse(CookieUtil.getCookie(this.LOGGED_IN))
+                this.accountId = data.account_id
                 this.nickname = data.nickname
                 this.email = data.email
                 super.reportSuccess()
-            }).catch((error) => {
-                console.log(error)
+            }catch(e){
                 super.reportFail()
-            })
+            }
+
         }
 
+        /**
+         * 갱신
+         * - 서버에선 email, password로 현재 갱신요청이 로그인된 사용자의 요청인지 검증함
+         * @param nickname {string} 실제로 바꿀 수 있는 값
+         * @param email {string} 필수값임, 실제로 바꿀 수 있는 값은 아님
+         * @param password {string} 필수 값임,
+         * @param new_password {string} 바꿀 수 있는 값
+         * @returns {Promise<void>}
+         * TODO: 갱신 페이지 만들기
+         */
         update(nickname, email, password, new_password) {
             super.reportProcessing()
             return fetch('/api/accounts/my', {
@@ -438,7 +565,6 @@ const wordbookService = (function () {
                 body: JSON.stringify({
                     nickname, email, password, new_password
                 })
-
             }).then((response) => {
                 if (!response.ok) {
                     console.warn(response)
@@ -447,7 +573,7 @@ const wordbookService = (function () {
                 return response.json()
             }).then((data) => {
                 console.log(data)
-                this.id = data.account_id
+                this.accountId = data.accountId
                 this.nickname = data.nickname
                 this.email = data.email
                 super.reportSuccess()
@@ -463,6 +589,7 @@ const wordbookService = (function () {
         NewWordbook,
         CurrentWordbook,
         Wordbooks,
+        MyWordbooks,
         getAccount
     }
 })();
@@ -474,6 +601,6 @@ function EmptyWordbookException() {
 }
 
 EmptyWordbookException.prototype.toString = function () {
-    return 'At least one QA must be included'
+    return '적어도 하나의 문제/정답이 들어가야 합니다'
 }
 

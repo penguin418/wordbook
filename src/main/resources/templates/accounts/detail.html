@@ -7,9 +7,9 @@
 </head>
 <body>
 <script>
-    const {URLs, Wordbooks} = wordbookService
-    const wordbooks = new Wordbooks()
-    wordbooks.findAll()
+    const {URLs, MyWordbooks} = wordbookService
+    const wordbooks = new MyWordbooks()
+    wordbooks.findMyWordbooks()
 
     $(document).ready(function (message) {
         $('#wordbook-list-link').href = URLs.wordbookList()
@@ -20,13 +20,16 @@
             wordbooks.contents.forEach(item => {
                 console.log(item.name)
                 const newItem = $('#wordbooks-item-template').clone()
-                newItem.attr('href', URLs.wordbookItem(item.id))
+                newItem.attr('href', URLs.wordbookItem(item.wordbook_id))
                 newItem.children('h5.wordbook-name').text(item.name)
                 newItem.children('h5.wordbook-description').text(item.description)
                 newItem.removeAttr('id')
                 newItem.removeClass('hidden')
                 $('.list-group').append(newItem)
             })
+        })
+        wordbooks.onLoadFailed(()=>{
+            console.log('failed')
         })
     })
 </script>
@@ -37,10 +40,10 @@
 
     <div class="row justify-content-center">
         <div class="col-8">
+            <a href="/wordbooks/create" class="list-group-item">
+                <h5>새로운 단어장 만들기</h5>
+            </a>
             <div class="list-group">
-                <a href="/wordbooks/create" class="list-group-item">
-                    <h5>새로운 단어장 만들기</h5>
-                </a>
                 <a class="list-group-item hidden" id="wordbooks-item-template">
                     <h5 class="wordbook-name"></h5>
                     <h5 class="wordbook-description"></h5>
