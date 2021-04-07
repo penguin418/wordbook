@@ -47,7 +47,7 @@ public class WordbookDto {
     @Builder
     public static class WordbookUpdateDto {
 
-        private Long id;
+        private Long accountId;
 
         private AccountInfoDto account;
 
@@ -68,7 +68,7 @@ public class WordbookDto {
     @Builder
     public static class WordbookDetailDto {
 
-        private Long id;
+        private Long wordbookId;
 
         private AccountInfoDto account;
 
@@ -86,7 +86,7 @@ public class WordbookDto {
     @Builder
     public static class WordbookItemDto {
 
-        private Long id;
+        private Long wordbookId;
 
         private AccountInfoDto account;
 
@@ -111,5 +111,17 @@ public class WordbookDto {
 
         List<WordbookItemDto> contents;
 
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MyWordbookResultSetDto {
+        private Long total;
+
+        private Long page;
+
+        List<WordbookItemDto> contents;
     }
 }

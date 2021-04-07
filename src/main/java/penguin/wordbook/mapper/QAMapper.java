@@ -14,10 +14,8 @@ public interface QAMapper {
     @Mapping(target = "wordbook", ignore = true)
     public QA map(QACreateDto dto);
 
-    @Mapping(source = "id", target = "qaId")
     @Mapping(target = "wordbook", ignore = true)
     public QA map(QAUpdateDto dto);
 
-    @Mapping(source = "qaId", target = "id")
     public QAResponseDto map(QA entity);
 }
