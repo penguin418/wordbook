@@ -8,7 +8,7 @@ const CookieUtil = (function () {
      * @param timeout.day  일
      * @param timeout.week 주
      */
-    const setCookie = function (name, value, timeout= undefined) {
+    const setCookie = function (name, value, timeout = undefined) {
         const expires = calcTimeout(timeout)
         document.cookie = name + '=' + value + '; expires=' + expires.toUTCString() + '; path=/';
     };
@@ -23,7 +23,7 @@ const CookieUtil = (function () {
         const cookies = decodeURIComponent(document.cookie).split('; ')
         let res;
         cookies.forEach(val => {
-            if (val.indexOf(cookieName) === 0){
+            if (val.indexOf(cookieName) === 0) {
                 // 마지막에 설정한 값
                 res = val.substring(cookieName.length)
             }
@@ -36,7 +36,7 @@ const CookieUtil = (function () {
      * @param name {string} 쿠키 이름
      */
     const deleteCookie = function (name) {
-        setCookie(name,"",{hour:0})
+        setCookie(name, "", {hour: 0})
     }
 
     /**
@@ -46,15 +46,15 @@ const CookieUtil = (function () {
      * @param timeout.day  일
      * @param timeout.week 주
      */
-    const calcTimeout = function( timeout=undefined){
+    const calcTimeout = function (timeout = undefined) {
         const date = new Date();
-        if (!timeout){
+        if (!timeout) {
             date.setTime(date.getTime() + 1000 * 60 * 60 * 24);
-        }else if (!!timeout.hour) {
+        } else if (!!timeout.hour) {
             date.setTime(date.getTime() + 1000 * 60 * 60 * timeout.hour);
-        }else if(!!timeout.day){
+        } else if (!!timeout.day) {
             date.setTime(date.getTime() + 1000 * 60 * 60 * 24 * timeout.day);
-        } else if (!!timeout.week){
+        } else if (!!timeout.week) {
             date.setTime(date.getTime() + 1000 * 60 * 60 * 24 * 7 * week);
         }
         return date

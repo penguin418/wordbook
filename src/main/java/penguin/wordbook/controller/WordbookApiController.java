@@ -5,6 +5,8 @@ import static penguin.wordbook.controller.dto.WordbookDto.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import penguin.wordbook.service.WordbookService;
@@ -30,13 +32,8 @@ public class WordbookApiController {
     public ResponseEntity<WordbookDetailDto> PostWordbookCreate(@RequestBody WordbookCreateDto wordbook) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         System.out.println(objectMapper.writeValueAsString(wordbook));
-        try {
-            WordbookDetailDto dto = wordbookService.create(wordbook);
-            return ResponseEntity.ok(dto);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().build();
-        }
+        WordbookDetailDto dto = wordbookService.create(wordbook);
+        return ResponseEntity.ok(dto);
     }
 
     /**
@@ -46,15 +43,9 @@ public class WordbookApiController {
      */
     @GetMapping("/api/wordbooks")
     public ResponseEntity<WordbooksResultSetDto> GetWordbookList() {
-        try {
-            List<WordbookItemDto> results = wordbookService.findAll();
-            WordbooksResultSetDto resultSet = new WordbooksResultSetDto((long) results.size(), 1L, results);
-            return ResponseEntity.ok(resultSet);
-        } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        List<WordbookItemDto> results = wordbookService.findAll();
+        WordbooksResultSetDto resultSet = new WordbooksResultSetDto((long) results.size(), 1L, results);
+        return ResponseEntity.ok(resultSet);
     }
 
     /**
@@ -64,16 +55,9 @@ public class WordbookApiController {
      * @return
      */
     @GetMapping("/api/wordbooks/{id}")
-    public ResponseEntity<WordbookDetailDto> GetWordbookUpdate(@PathVariable(value = "id") String id) {
-        try {
-            Long wordbookId = Long.parseLong(id);
-            WordbookDetailDto dto = wordbookService.findOne(wordbookId);
-            return ResponseEntity.ok(dto);
-        } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<WordbookDetailDto> GetWordbookUpdate(@PathVariable(value = "id") Long id) {
+        WordbookDetailDto dto = wordbookService.findOne(id);
+        return ResponseEntity.ok(dto);
     }
 
     /**
@@ -85,7 +69,7 @@ public class WordbookApiController {
      * @throws JsonProcessingException
      */
     @PostMapping("/api/wordbooks/{id}")
-    public ResponseEntity<?> PostWordbookUpdate(@PathVariable(value = "id") String id, @RequestBody WordbookUpdateDto wordbook) throws JsonProcessingException {
+    public ResponseEntity<?> PostWordbookUpdate(@PathVariable(value = "id") Long id, @RequestBody WordbookUpdateDto wordbook) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         System.out.println(objectMapper.writeValueAsString(wordbook));
         wordbookService.update(wordbook);
@@ -100,16 +84,22 @@ public class WordbookApiController {
      */
     @DeleteMapping("/api/wordbooks/{id}")
     @ResponseBody
-    public ResponseEntity<?> DeleteWordbook(@PathVariable(value = "id") String id) {
-        try {
-            Long wordbookId = Long.parseLong(id);
-            wordbookService.removeById(wordbookId);
-            return ResponseEntity.ok().build();
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<?> DeleteWordbook(@PathVariable(value = "id") Long id) {
+        wordbookService.removeById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 조회 문제
+     * - wordbook 이 없습니다
+     *
+     * @param e EntityNotFoundException
+     * @return ErrorType.WordbookNotFound
+     */
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ErrorType entityNotFoundException(Exception e) {
+        return ErrorType.WordbookNotFound;
     }
 
 
