@@ -229,7 +229,10 @@ const wordbookService = (function () {
                 }),
             }).then((response) => {
                 if (!response.ok) {
-                    throw new Error(response.statusText)
+                    console.warn(response)
+                    response.json().then(res => {
+                        throw new Error(res)
+                    })
                 }
                 return response.json()
             }).then(data => {
@@ -264,7 +267,10 @@ const wordbookService = (function () {
                 method: 'GET',
             }).then((response) => {
                 if (!response.ok) {
-                    throw new Error(response.statusText)
+                    console.warn(response)
+                    response.json().then(res => {
+                        throw new Error(res)
+                    })
                 }
                 return response.json()
             }).then(data => {
@@ -342,7 +348,10 @@ const wordbookService = (function () {
                 method: "GET",
             }).then((response) => {
                 if (!response.ok) {
-                    throw new Error(response.statusText)
+                    console.warn(response)
+                    response.json().then(res => {
+                        throw new Error(res)
+                    })
                 }
                 return response.json()
             }).then((data) => {
@@ -376,7 +385,10 @@ const wordbookService = (function () {
                 method: "GET",
             }).then((response) => {
                 if (!response.ok) {
-                    throw new Error(response.statusText)
+                    console.warn(response)
+                    response.json().then(res => {
+                        throw new Error(res)
+                    })
                 }
                 return response.json()
             }).then((data) => {
@@ -451,7 +463,10 @@ const wordbookService = (function () {
                 })
             }).then((response) => {
                 if (!response.ok) {
-                    throw new Error(response.statusText)
+                    console.warn(response)
+                    response.json().then(res => {
+                        throw new Error(res)
+                    })
                 }
                 return response.json()
             }).then((data) => {
@@ -482,7 +497,9 @@ const wordbookService = (function () {
             }).then((response) => {
                 if (!response.ok) {
                     console.warn(response)
-                    throw new Error(response.statusText)
+                    response.json().then(res => {
+                        throw new Error(res)
+                    })
                 }
                 return response.json()
             }).then((data) => {
@@ -521,10 +538,12 @@ const wordbookService = (function () {
             //     method: 'GET'
             //
             // }).then((response) => {
-            //     if (!response.ok) {
-            //         console.warn(response)
-            //         throw new Error(response.statusText)
-            //     }
+            //         if (!response.ok) {
+            //             console.warn(response)
+            //             response.json().then(res => {
+            //                 throw new Error(res)
+            //             })
+            //         }
             //     return response.json()
             // }).then((data) => {
             //     console.log(data)
@@ -568,7 +587,9 @@ const wordbookService = (function () {
             }).then((response) => {
                 if (!response.ok) {
                     console.warn(response)
-                    throw new Error(response.statusText)
+                    response.json().then(res => {
+                        throw new Error(res)
+                    })
                 }
                 return response.json()
             }).then((data) => {
