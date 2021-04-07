@@ -1,3 +1,6 @@
+/**
+ * wordbook-service.js의 account 관련 api 가 잘 작동하는지 확인합니다
+ */
 $(document).ready(function (message) {
     const {URLs, getAccount} = wordbookService
     const account = getAccount()
@@ -10,6 +13,7 @@ $(document).ready(function (message) {
 
     testCreate()
 
+    // 생성 테스트
     function testCreate() {
         try {
             account.create(nickname, email, password)
@@ -24,6 +28,7 @@ $(document).ready(function (message) {
         }
     }
 
+    // 로그인 테스트
     function testLogin() {
         try {
             account.login(email, password)
@@ -38,6 +43,7 @@ $(document).ready(function (message) {
         }
     }
 
+    // 상태 테스트
     function testIsLoggedIn() {
         try {
             const loggedIn = account.isLoggedIn()
@@ -50,6 +56,7 @@ $(document).ready(function (message) {
         }
     }
 
+    // 내 정보 테스트
     function testGetMyAccount() {
         try {
             account.getMyAccount()
@@ -64,6 +71,7 @@ $(document).ready(function (message) {
 
     }
 
+    // 로그아웃 테스트
     function testLogout() {
         try {
             account.logout()

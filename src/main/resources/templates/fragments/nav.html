@@ -57,6 +57,9 @@
             const {URLs, getAccount} = wordbookService
             const account = getAccount()
             account.logout()
+            account.onLoad(()=>{
+                $("#logout").hide()
+            })
         })
     </script>
 </nav>
