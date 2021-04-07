@@ -8,8 +8,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import penguin.wordbook.config.UserDetail;
 import penguin.wordbook.service.WordbookService;
+import penguin.wordbook.util.UserDetailUtil;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
@@ -29,7 +33,10 @@ public class WordbookApiController {
      * @throws JsonProcessingException
      */
     @PostMapping("/api/wordbooks")
-    public ResponseEntity<WordbookDetailDto> PostWordbookCreate(@RequestBody WordbookCreateDto wordbook) throws JsonProcessingException {
+    public ResponseEntity<WordbookDetailDto> PostWordbookCreate(@RequestBody WordbookCreateDto wordbook, Authentication authentication) throws JsonProcessingException {
+        UserDetail userDetail = (UserDetail)authentication.getPrincipal();
+        UserDetailUtil.validateUserInfo(userDetail, wordbook.getAccount());
+
         ObjectMapper objectMapper = new ObjectMapper();
         System.out.println(objectMapper.writeValueAsString(wordbook));
         WordbookDetailDto dto = wordbookService.create(wordbook);
