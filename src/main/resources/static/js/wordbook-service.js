@@ -146,7 +146,7 @@ const wordbookService = (function () {
         constructor() {
             super()
             this.account = {}
-            this.id = 0
+            this.wordbookId = 0
             this.name = ''
             this.description = ''
             this.qaList = []
@@ -158,6 +158,10 @@ const wordbookService = (function () {
             this.account.email = account.email
         }
 
+        getAccount(){
+            return this.account
+        }
+
         /**
          * wordbook name 을 지정합니다
          * @Param newName {string} 새로운 wordbook name
@@ -167,6 +171,10 @@ const wordbookService = (function () {
             this.name = newName
         }
 
+        getName(){
+            return this.name
+        }
+
         /**
          * wordbook description 을 지정합니다
          * @Param newDescription {string} 새로운 wordbook description
@@ -174,6 +182,10 @@ const wordbookService = (function () {
          */
         setDescription(newDescription) {
             this.description = newDescription
+        }
+
+        getDescription(){
+            return this.description
         }
 
         /**
@@ -187,6 +199,10 @@ const wordbookService = (function () {
                 'question': question.toString(),
                 'answer': answer.toString()
             })
+        }
+
+        getQAList(){
+            return this.qaList
         }
 
         /**
@@ -253,7 +269,7 @@ const wordbookService = (function () {
                 return response.json()
             }).then(data => {
                 console.log(data)
-                this.id = data.id
+                this.wordbookId = data.wordbook_id
                 this.name = data.name
                 this.description = data.description
                 this.qaList = data.qa_list
@@ -280,7 +296,7 @@ const wordbookService = (function () {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    id: this.id,
+                    wordbook_id: this.wordbookId,
                     name: this.name,
                     description: this.description,
                     qa_list: this.qaList
@@ -294,7 +310,7 @@ const wordbookService = (function () {
          * @returns {Promise<void>} 다음 동작을 수행할 수 있습니다
          */
         deleteFromServer() {
-            return fetch('/api/wordbooks/' + this.id, {
+            return fetch('/api/wordbooks/' + this.wordbookId, {
                 method: 'DELETE',
             }).then((response) => console.log(response))
         }
@@ -344,7 +360,8 @@ const wordbookService = (function () {
 
     /**
      * 나의 wordbooks 를 관리하는 클래스
-     * @type {MyWordbooks}
+     * @class
+     * @classdesc 나의 wordbooks 를 관리합니다
      */
     const MyWordbooks = class extends Wordbooks{
         /**
@@ -353,6 +370,7 @@ const wordbookService = (function () {
          * @returns {Promise<void>}
          */
         findMyWordbooks() {
+            console.log('find my wordbook')
             super.reportProcessing()
             return fetch('/api/accounts/my/wordbooks', {
                 method: "GET",
@@ -376,8 +394,9 @@ const wordbookService = (function () {
     const getAccount = function () {
         if (accountInstance === undefined) {
             accountInstance = new AccountClass()
-            if (accountInstance.isLoggedIn())
+            if (accountInstance.isLoggedIn()) {
                 accountInstance.getMyAccount()
+            }
         }
         return accountInstance
     }
@@ -386,15 +405,14 @@ const wordbookService = (function () {
 
         constructor() {
             super()
-            this.account_id = ''
+            this.accountId = ''
             this.nickname = ''
             this.email = ''
             this.LOGGED_IN = 'WORDBOOK_LOGGED_IN'
         }
 
         isLoggedIn() {
-            const token = CookieUtil.getCookie(this.LOGGED_IN)
-            console.log('cookie=', token)
+            const token = CookieUtil.getCookie('REFRESH_TOKEN')
             return (typeof token !== "undefined")
         }
 
@@ -440,10 +458,10 @@ const wordbookService = (function () {
                 return response.json()
             }).then((data) => {
                 console.log(data)
-                this.account_id = data.account_id
+                this.accountId = data.account_id
                 this.nickname = data.nickname
                 this.email = data.email
-                CookieUtil.setCookie(this.LOGGED_IN, true)
+                CookieUtil.setCookie(this.LOGGED_IN, JSON.stringify(data))
                 super.reportSuccess()
             }).catch((error) => {
                 console.log(error)
@@ -464,25 +482,35 @@ const wordbookService = (function () {
 
         getMyAccount() {
             super.reportProcessing()
-            return fetch('/api/accounts/my', {
-                method: 'GET'
-
-            }).then((response) => {
-                if (!response.ok) {
-                    console.warn(response)
-                    throw new Error(response.statusText)
-                }
-                return response.json()
-            }).then((data) => {
-                console.log(data)
-                this.account_id = data.account_id
+            // return fetch('/api/accounts/my', {
+            //     method: 'GET'
+            //
+            // }).then((response) => {
+            //     if (!response.ok) {
+            //         console.warn(response)
+            //         throw new Error(response.statusText)
+            //     }
+            //     return response.json()
+            // }).then((data) => {
+            //     console.log(data)
+            //     this.accountId = data.accountId
+            //     this.nickname = data.nickname
+            //     this.email = data.email
+            //     super.reportSuccess()
+            // }).catch((error) => {
+            //     console.log(error)
+            //     super.reportFail()
+            // })
+            try {
+                const data = JSON.parse(CookieUtil.getCookie(this.LOGGED_IN))
+                this.accountId = data.account_id
                 this.nickname = data.nickname
                 this.email = data.email
                 super.reportSuccess()
-            }).catch((error) => {
-                console.log(error)
+            }catch(e){
                 super.reportFail()
-            })
+            }
+
         }
 
         update(nickname, email, password, new_password) {
@@ -500,7 +528,7 @@ const wordbookService = (function () {
                 return response.json()
             }).then((data) => {
                 console.log(data)
-                this.account_id = data.account_id
+                this.accountId = data.accountId
                 this.nickname = data.nickname
                 this.email = data.email
                 super.reportSuccess()
