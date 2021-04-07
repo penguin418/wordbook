@@ -28,8 +28,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	// mysql
 	runtimeOnly 'mysql:mysql-connector-java'
-	//
-//	implementation group: 'org.mindrot', name: 'jbcrypt', version: '0.3m'
 
 	// security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
