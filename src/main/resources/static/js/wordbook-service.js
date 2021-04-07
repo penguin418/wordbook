@@ -329,16 +329,47 @@ const wordbookService = (function () {
                     throw new Error(response.statusText)
                 }
                 return response.json()
+            }).then((data) => {
+                this.contents = data.contents
+                this.length = data.length
+                this.page = data.page
+                super.reportSuccess()
+            }).catch((error) => {
+                console.log(error)
+                super.reportFail()
             })
-                .then((data) => {
-                    this.contents = data.contents
-                    this.length = data.length
-                    this.page = data.page
-                    super.reportSuccess()
-                }).catch((error) => {
-                    console.log(error)
-                    super.reportFail()
-                })
+        }
+
+    }
+
+    /**
+     * 나의 wordbooks 를 관리하는 클래스
+     * @type {MyWordbooks}
+     */
+    const MyWordbooks = class extends Wordbooks{
+        /**
+         * 나의 wordbooks 를 조회합니다
+         * @this MyWordbooks
+         * @returns {Promise<void>}
+         */
+        findMyWordbooks() {
+            super.reportProcessing()
+            return fetch('/api/accounts/my/wordbooks', {
+                method: "GET",
+            }).then((response) => {
+                if (!response.ok) {
+                    throw new Error(response.statusText)
+                }
+                return response.json()
+            }).then((data) => {
+                this.contents = data.contents
+                this.length = data.length
+                this.page = data.page
+                super.reportSuccess()
+            }).catch((error) => {
+                console.log(error)
+                super.reportFail()
+            })
         }
     }
 
@@ -485,6 +516,7 @@ const wordbookService = (function () {
         NewWordbook,
         CurrentWordbook,
         Wordbooks,
+        MyWordbooks,
         getAccount
     }
 })();
