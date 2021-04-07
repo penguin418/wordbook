@@ -112,4 +112,16 @@ public class WordbookDto {
         List<WordbookItemDto> contents;
 
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MyWordbookResultSetDto {
+        private Long total;
+
+        private Long page;
+
+        List<WordbookItemDto> contents;
+    }
 }

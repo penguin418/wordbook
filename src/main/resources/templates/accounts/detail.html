@@ -7,9 +7,9 @@
 </head>
 <body>
 <script>
-    const {URLs, Wordbooks} = wordbookService
-    const wordbooks = new Wordbooks()
-    wordbooks.findAll()
+    const {URLs, MyWordbooks} = wordbookService
+    const wordbooks = new MyWordbooks()
+    wordbooks.findMyWordbooks()
 
     $(document).ready(function (message) {
         $('#wordbook-list-link').href = URLs.wordbookList()
@@ -27,6 +27,9 @@
                 newItem.removeClass('hidden')
                 $('.list-group').append(newItem)
             })
+        })
+        wordbooks.onLoadFailed(()=>{
+            console.log('failed')
         })
     })
 </script>

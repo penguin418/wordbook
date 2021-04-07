@@ -53,6 +53,10 @@ public class WordbookService {
         return wordbookRepository.findAll().stream().map(wordbookMapper::mapToItemDto).collect(Collectors.toList());
     }
 
+    public List<WordbookItemDto> findByAccountId(Long accountId){
+        return wordbookRepository.findByAccountAccountId(accountId).stream().map(wordbookMapper::mapToItemDto).collect(Collectors.toList());
+    }
+
     /**
      * 갱신
      * @param dto {WordbookUpdateDto}

@@ -35,6 +35,13 @@ public class Wordbook {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "wordbook")
     private List<QA> qaList = new ArrayList<>();
 
+    public void setQaList(List<QA> qaList){
+        for (QA qa: qaList){
+            qa.setWordbook(this);
+        }
+        this.qaList = qaList;
+    }
+
     public void addQA(QA qa){
         qaList.add(qa);
         qa.setWordbook(this);
