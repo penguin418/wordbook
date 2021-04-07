@@ -390,7 +390,15 @@ const wordbookService = (function () {
             })
         }
     }
-
+    /**
+     * Account 인스턴스 가져옴
+     * - 싱글턴 구현
+     * - 매 페이지를 로드할때 Account 를 초기화하며,
+     *   이후 페이지 내에서 공유하기 위해 사용됨
+     * - 처음 초기화할 때 정보를 초기화함
+     * @returns {AccountClass}
+     * FIXME: 로그인 확인하고 getMyAccount는 constructor로 옮기기로
+     */
     const getAccount = function () {
         if (accountInstance === undefined) {
             accountInstance = new AccountClass()
@@ -411,11 +419,26 @@ const wordbookService = (function () {
             this.LOGGED_IN = 'WORDBOOK_LOGGED_IN'
         }
 
+        /**
+         * 로그인 여부를 확인함
+         * - 쿠키에 `REFRESH_TOKEN`이 존재하는 여부로 판단
+         * - REFRESH_TOKEN이 있으면 로그인 갱신이 되므로 REFRESH_TOKEN이
+         *   로그인 확인 수단으로 적절함
+         * @returns {boolean}
+         */
         isLoggedIn() {
             const token = CookieUtil.getCookie('REFRESH_TOKEN')
             return (typeof token !== "undefined")
         }
 
+        /**
+         * 가입
+         * @param nickname {string} 이름
+         * @param email {string} 이메일
+         * @param password {string} 패스워드
+         * @returns {Promise<void>}
+         * TODO: 닉네임 중복과 email 중복을 구분해서 처리하기 위해 report 메소드 개선 예정
+         */
         create(nickname, email, password) {
             super.reportProcessing()
             return fetch('/api/accounts', {
@@ -439,6 +462,12 @@ const wordbookService = (function () {
             })
         }
 
+        /**
+         * 로그인
+         * @param email {string} 이메일
+         * @param password {string} 패스워드
+         * @returns {Promise<void>}
+         */
         login(email, password) {
             super.reportProcessing()
             return fetch('/api/accounts/login', {
@@ -469,7 +498,10 @@ const wordbookService = (function () {
             })
         }
 
-
+        /**
+         * 로그아웃
+         * @returns {Promise<void>}
+         */
         logout() {
             super.reportProcessing()
             return fetch('/api/accounts/logout', {
@@ -480,6 +512,9 @@ const wordbookService = (function () {
             })
         }
 
+        /**
+         * 내 정보
+         */
         getMyAccount() {
             super.reportProcessing()
             // return fetch('/api/accounts/my', {
@@ -513,6 +548,16 @@ const wordbookService = (function () {
 
         }
 
+        /**
+         * 갱신
+         * - 서버에선 email, password로 현재 갱신요청이 로그인된 사용자의 요청인지 검증함
+         * @param nickname {string} 실제로 바꿀 수 있는 값
+         * @param email {string} 필수값임, 실제로 바꿀 수 있는 값은 아님
+         * @param password {string} 필수 값임,
+         * @param new_password {string} 바꿀 수 있는 값
+         * @returns {Promise<void>}
+         * TODO: 갱신 페이지 만들기
+         */
         update(nickname, email, password, new_password) {
             super.reportProcessing()
             return fetch('/api/accounts/my', {
