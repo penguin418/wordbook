@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -65,13 +66,12 @@ public class AccountApiController {
      * @return ResponseEntity 성공 시: AccountResponseDto, 실패 시 BadRequest
      */
     @PostMapping("/api/accounts/login")
-    public ResponseEntity<AccountInfoDto> login(@RequestBody AccountLoginDto accountLoginDto,
-                                                HttpServletResponse res) {
+    public ResponseEntity<AccountInfoDto> login(@RequestBody AccountLoginDto accountLoginDto, HttpServletResponse res)
+            throws BadCredentialsException, InternalAuthenticationServiceException {
         final UsernamePasswordAuthenticationToken token
                 = new UsernamePasswordAuthenticationToken(accountLoginDto.getEmail(), accountLoginDto.getPassword());
         // 정보 확인
         authenticationManager.authenticate(token);
-
         // 로그인 토큰을 쿠키에 삽입
         final UserDetail userDetail = accountService.loadUserByUsername(accountLoginDto.getEmail());
         final String accessToken = jwtTokenUtil.issueAccessToken(userDetail);
@@ -132,7 +132,8 @@ public class AccountApiController {
      * @return ResponseEntity 성공 시: AccountResponseDto, 실패 시: badRequest
      */
     @PutMapping("/api/accounts/my")
-    public ResponseEntity<AccountInfoDto> update(@RequestBody AccountUpdateDto accountUpdateDto) {
+    public ResponseEntity<AccountInfoDto> update(@RequestBody AccountUpdateDto accountUpdateDto)
+            throws BadCredentialsException, InternalAuthenticationServiceException {
         final UsernamePasswordAuthenticationToken token
                 = new UsernamePasswordAuthenticationToken(accountUpdateDto.getEmail(), accountUpdateDto.getPassword());
         // 비밀번호 검사
@@ -158,49 +159,5 @@ public class AccountApiController {
         List<WordbookItemDto> results = wordbookService.findByAccountId(userDetail.getAccountId());
         MyWordbookResultSetDto resultSet = new MyWordbookResultSetDto((long) results.size(), 1L, results);
         return ResponseEntity.ok(resultSet);
-    }
-
-    /**
-     * 회원가입 문제
-     * - 이미 가입된 이메일입니다
-     *
-     * @param e DuplicateKeyException
-     * @return ErrorType.EmailExists | ErrorType.NicknameExists
-     */
-    @ResponseStatus(code = HttpStatus.CONFLICT)
-    @ExceptionHandler(DuplicateKeyException.class)
-    public ErrorType duplicateKeyException(Exception e) {
-        if (e.getMessage().equals("nickname")) {
-            return ErrorType.NicknameExists;
-        } else if (e.getMessage().equals("email")) {
-            return ErrorType.EmailExists;
-        }
-        return ErrorType.EmailExists;
-    }
-
-    /**
-     * 로그인 문제 - 비밀번호가 틀립니다,
-     * 회원정보 수정 문제 - 비밀번호가 틀립니다
-     *
-     * @param e BadCredentialsException
-     * @return ErrorType.PasswordDoesNotMatch
-     */
-    @ResponseStatus(code = HttpStatus.FORBIDDEN)
-    @ExceptionHandler(BadCredentialsException.class)
-    public ErrorType badCredentialsException(Exception e) {
-        return ErrorType.PasswordDoesNotMatch;
-    }
-
-    /**
-     * 로그인 문제
-     * - 회원정보를 찾을 수 없습니다
-     *
-     * @param e UsernameNotFoundException
-     * @return ErrorType.UsernameNotFound
-     */
-    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ErrorType usernameNotFoundException(Exception e) {
-        return ErrorType.UsernameNotFound;
     }
 }
