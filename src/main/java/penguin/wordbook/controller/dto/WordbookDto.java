@@ -10,7 +10,9 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class WordbookDto {
 
@@ -30,7 +32,7 @@ public class WordbookDto {
         private String description;
 
         @Builder.Default
-        private List<QACreateDto> qaList = new ArrayList<>();
+        private Set<QACreateDto> qaList = new HashSet<>();
 
         public WordbookCreateDto(String name, String description) {
             this.name = name;
@@ -47,9 +49,7 @@ public class WordbookDto {
     @Builder
     public static class WordbookUpdateDto {
 
-        private Long accountId;
-
-        private AccountInfoDto account;
+        private Long wordbookId;
 
         private AccountInfoDto account;
 
@@ -58,7 +58,7 @@ public class WordbookDto {
         private String description;
 
         @Builder.Default
-        private List<QAUpdateDto> qaList = new ArrayList<>();
+        private Set<QAUpdateDto> qaList = new HashSet<>();
     }
 
     /**
@@ -74,14 +74,12 @@ public class WordbookDto {
 
         private AccountInfoDto account;
 
-        private AccountInfoDto account;
-
         private String name;
 
         private String description;
 
         @Builder.Default
-        private List<QAResponseDto> qaList = new ArrayList<>();
+        private Set<QAResponseDto> qaList = new HashSet<>();
     }
 
     @Getter
@@ -91,8 +89,6 @@ public class WordbookDto {
     public static class WordbookItemDto {
 
         private Long wordbookId;
-
-        private AccountInfoDto account;
 
         private AccountInfoDto account;
 

@@ -116,7 +116,7 @@ const wordbookService = (function () {
          * @this Notifiable
          */
         reportSuccess() {
-            if (this.onSuccessFunction) {
+            if (!!this.onSuccessFunction) {
                 this.onSuccessFunction.call()
                 this.status = this.STATE.READY
             }
@@ -129,10 +129,19 @@ const wordbookService = (function () {
          * @this Notifiable
          */
         reportFail() {
-            if (this.onSuccessFunction) {
+            if (!!this.onFailedFunction) {
                 this.onFailedFunction.call()
                 this.status = this.STATE.READY
             }
+        }
+
+        startSimpleProcess(process) {
+            this.reportProcessing()
+            process.then((data) => {
+                this.reportSuccess()
+            }).catch((error) => {
+                this.reportFail()
+            })
         }
     }
 
@@ -146,19 +155,18 @@ const wordbookService = (function () {
         constructor() {
             super()
             this.account = {}
-            this.wordbookId = 0
             this.name = ''
             this.description = ''
             this.qaList = []
         }
 
         setAccount(account) {
-            this.account.account_id = account.account_id
+            this.account.account_id = account.accountId
             this.account.nickname = account.nickname
             this.account.email = account.email
         }
 
-        getAccount(){
+        getAccount() {
             return this.account
         }
 
@@ -171,7 +179,7 @@ const wordbookService = (function () {
             this.name = newName
         }
 
-        getName(){
+        getName() {
             return this.name
         }
 
@@ -184,7 +192,7 @@ const wordbookService = (function () {
             this.description = newDescription
         }
 
-        getDescription(){
+        getDescription() {
             return this.description
         }
 
@@ -194,21 +202,26 @@ const wordbookService = (function () {
          * @Param answer {string} 새로운 Answer
          * @this NewWordbook 현재 새로 만들어진 wordbook
          */
-        addQA(question, answer, id = 0) {
+        addQa(question, answer, qa_id = 0) {
             this.qaList.push({
                 'question': question.toString(),
-                'answer': answer.toString()
+                'answer': answer.toString(),
+                'qa_id': qa_id
             })
         }
 
-        getQAList(){
+        setQaList(qaList) {
+            this.qaList = qaList
+        }
+
+        getQaList() {
             return this.qaList
         }
 
         /**
          * 서버에 현재 wordbook을 저장합니다
          * @this NewWordbook 현재 새로 만들어진 wordbook
-         * @throws EmptyWordbookException {EmptyWordbookException} 1개 이상의 QA가 있어야 합니다
+         * @throws EmptyWordbookException {EmptyWordbookException} 1개 이상의 Qa가 있어야 합니다
          * @returns {Promise<Response>} 다음 동작을 수행할 수 있습니다
          */
         saveToServer() {
@@ -216,29 +229,15 @@ const wordbookService = (function () {
                 throw new EmptyWordbookException()
             }
             super.reportProcessing()
-            return fetch('/api/wordbooks', {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
+            const {createWordbook} = WordbookApis
+            super.startSimpleProcess(
+                createWordbook({
+                    account: this.account,
                     name: this.name,
                     description: this.description,
-                    qa_list: this.qaList,
-                    account: this.account
-                }),
-            }).then((response) => {
-                if (!response.ok) {
-                    throw new Error(response.statusText)
-                }
-                return response.json()
-            }).then(data => {
-                console.log(data)
-                super.reportSuccess()
-            }).catch((error) => {
-                console.log(error)
-                super.reportFail()
-            })
+                    qa_list: this.qaList
+                })
+            )
         }
     }
 
@@ -248,6 +247,11 @@ const wordbookService = (function () {
      * @classdesc 각 변수를 채운뒤, saveToServer() 메소드를 통해 서버에 저장합니다
      */
     const CurrentWordbook = class extends NewWordbook {
+
+        constructor() {
+            super();
+            this.wordbookId = 0
+        }
 
         /**
          * 서버에서 하나의 wordbook을 찾아옵니다
@@ -260,14 +264,8 @@ const wordbookService = (function () {
                 throw new TypeError('id must be a Number')
             }
             super.reportProcessing()
-            return fetch('/api/wordbooks/' + id, {
-                method: 'GET',
-            }).then((response) => {
-                if (!response.ok) {
-                    throw new Error(response.statusText)
-                }
-                return response.json()
-            }).then(data => {
+            const {getWordbook} = WordbookApis
+            getWordbook(id).then(data => {
                 console.log(data)
                 this.wordbookId = data.wordbook_id
                 this.name = data.name
@@ -289,20 +287,27 @@ const wordbookService = (function () {
          * @returns {Promise<Response>} 다음 동작을 수행할 수 있습니다
          */
         saveToServer() {
-            super.saveToServer()
-            return fetch('/api/wordbooks', {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
+            const {updateWordbook} = WordbookApis
+            super.startSimpleProcess(
+                updateWordbook({
                     wordbook_id: this.wordbookId,
                     name: this.name,
                     description: this.description,
-                    qa_list: this.qaList
-                }),
-            })
+                    qa_list: this.qaList,
+                    account: this.account
+                })
+            )
         }
+
+        /**
+         * qa 를 삭제한다
+         * @param question
+         * @param answer
+         * @param qa_id
+         */
+        // removeQa(question, answer, qaId) {
+        //     this.qaDeleteList.push(qaId)
+        // }
 
         /**
          * 서버에서 현재 wordbook을 삭제합니다
@@ -310,9 +315,10 @@ const wordbookService = (function () {
          * @returns {Promise<void>} 다음 동작을 수행할 수 있습니다
          */
         deleteFromServer() {
-            return fetch('/api/wordbooks/' + this.wordbookId, {
-                method: 'DELETE',
-            }).then((response) => console.log(response))
+            const {removeWordbook} = WordbookApis
+            super.startSimpleProcess(
+                removeWordbook(this.wordbookId)
+            )
         }
     }
 
@@ -338,14 +344,8 @@ const wordbookService = (function () {
          */
         findAll() {
             super.reportProcessing()
-            return fetch('/api/wordbooks', {
-                method: "GET",
-            }).then((response) => {
-                if (!response.ok) {
-                    throw new Error(response.statusText)
-                }
-                return response.json()
-            }).then((data) => {
+            const {getWordbookList} = WordbookApis
+            getWordbookList().then((data) => {
                 this.contents = data.contents
                 this.length = data.length
                 this.page = data.page
@@ -363,23 +363,17 @@ const wordbookService = (function () {
      * @class
      * @classdesc 나의 wordbooks 를 관리합니다
      */
-    const MyWordbooks = class extends Wordbooks{
+    const MyWordbooks = class extends Wordbooks {
         /**
          * 나의 wordbooks 를 조회합니다
          * @this MyWordbooks
          * @returns {Promise<void>}
          */
         findMyWordbooks() {
-            console.log('find my wordbook')
             super.reportProcessing()
-            return fetch('/api/accounts/my/wordbooks', {
-                method: "GET",
-            }).then((response) => {
-                if (!response.ok) {
-                    throw new Error(response.statusText)
-                }
-                return response.json()
-            }).then((data) => {
+
+            const {getMyWordbooks} = WordbookApis
+            getMyWordbooks(undefined).then((data) => {
                 this.contents = data.contents
                 this.length = data.length
                 this.page = data.page
@@ -440,26 +434,10 @@ const wordbookService = (function () {
          * TODO: 닉네임 중복과 email 중복을 구분해서 처리하기 위해 report 메소드 개선 예정
          */
         create(nickname, email, password) {
-            super.reportProcessing()
-            return fetch('/api/accounts', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    nickname, email, password
-                })
-            }).then((response) => {
-                if (!response.ok) {
-                    throw new Error(response.statusText)
-                }
-                return response.json()
-            }).then((data) => {
-                super.reportSuccess()
-            }).catch((error) => {
-                console.log(error)
-                super.reportFail()
-            })
+            const {createAccount} = WordbookApis
+            super.startSimpleProcess(
+                createAccount({nickname, email, password})
+            )
         }
 
         /**
@@ -470,30 +448,12 @@ const wordbookService = (function () {
          */
         login(email, password) {
             super.reportProcessing()
-            return fetch('/api/accounts/login', {
-                method: 'POST',
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email: email.toString(),
-                    password: password.toString()
-                }),
-            }).then((response) => {
-                if (!response.ok) {
-                    console.warn(response)
-                    throw new Error(response.statusText)
-                }
-                return response.json()
-            }).then((data) => {
-                console.log(data)
-                this.accountId = data.account_id
-                this.nickname = data.nickname
-                this.email = data.email
+
+            const {loginAccount} = WordbookApis
+            loginAccount({email, password}).then((data) => {
                 CookieUtil.setCookie(this.LOGGED_IN, JSON.stringify(data))
                 super.reportSuccess()
             }).catch((error) => {
-                console.log(error)
                 super.reportFail()
             })
         }
@@ -504,9 +464,9 @@ const wordbookService = (function () {
          */
         logout() {
             super.reportProcessing()
-            return fetch('/api/accounts/logout', {
-                method: 'POST'
-            }).then(() => {
+
+            const {logoutAccount} = WordbookApis
+            logoutAccount().then(() => {
                 CookieUtil.deleteCookie(this.LOGGED_IN)
                 super.reportSuccess()
             })
@@ -517,18 +477,11 @@ const wordbookService = (function () {
          */
         getMyAccount() {
             super.reportProcessing()
-            // return fetch('/api/accounts/my', {
-            //     method: 'GET'
-            //
-            // }).then((response) => {
-            //     if (!response.ok) {
-            //         console.warn(response)
-            //         throw new Error(response.statusText)
-            //     }
-            //     return response.json()
-            // }).then((data) => {
+
+            // const {getMyAccount} = WordbookApis
+            // getMyAccount().then((data) => {
             //     console.log(data)
-            //     this.accountId = data.accountId
+            //     this.accountId = data.account_id
             //     this.nickname = data.nickname
             //     this.email = data.email
             //     super.reportSuccess()
@@ -538,11 +491,12 @@ const wordbookService = (function () {
             // })
             try {
                 const data = JSON.parse(CookieUtil.getCookie(this.LOGGED_IN))
+                console.log(data)
                 this.accountId = data.account_id
                 this.nickname = data.nickname
                 this.email = data.email
                 super.reportSuccess()
-            }catch(e){
+            } catch (e) {
                 super.reportFail()
             }
 
@@ -560,27 +514,16 @@ const wordbookService = (function () {
          */
         update(nickname, email, password, new_password) {
             super.reportProcessing()
-            return fetch('/api/accounts/my', {
-                method: 'PUT',
-                body: JSON.stringify({
-                    nickname, email, password, new_password
+            return WordbookApis.updateAccount({nickname, email, password, new_password})
+                .then((data) => {
+                    this.accountId = data.account_id
+                    this.nickname = data.nickname
+                    this.email = data.email
+                    super.reportSuccess()
+                }).catch((error) => {
+                    console.log(error)
+                    super.reportFail()
                 })
-            }).then((response) => {
-                if (!response.ok) {
-                    console.warn(response)
-                    throw new Error(response.statusText)
-                }
-                return response.json()
-            }).then((data) => {
-                console.log(data)
-                this.accountId = data.accountId
-                this.nickname = data.nickname
-                this.email = data.email
-                super.reportSuccess()
-            }).catch((error) => {
-                console.log(error)
-                super.reportFail()
-            })
         }
     }
 

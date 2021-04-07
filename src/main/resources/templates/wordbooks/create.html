@@ -12,6 +12,7 @@
     <!--    </style>-->
     <script>
         // 초기화 시 등록
+        const {getQaItem, makeQaItem} = UiHelper
         $(document).ready(function (message) {
             const {URLs, NewWordbook, getAccount} = wordbookService
             const account = getAccount()
@@ -25,40 +26,28 @@
                 newWordbook.setName($("#name").val())
                 newWordbook.setDescription($("#description").val())
 
-                $.each($(".qa"), function (index, qa) {
-                    const question = $(qa).find(".qa-question").text()
-                    const answer = $(qa).find(".qa-answer").text()
-                    newWordbook.addQA(question, answer)
+                $.each($(".qa"), function (index, qaItem) {
+                    const qa = getQaItem($(qaItem))
+                    newWordbook.addQa(qa.question, qa.answer)
                 })
 
                 console.log(newWordbook)
-                try {
-                    newWordbook.saveToServer()
-                    newWordbook.onLoad(()=>{
-                        location.href = URLs.wordbookList()
-                    })
-                    newWordbook.onLoadFailed(()=>{
-                        alert('로그인 후 가능한 기능입니다')
-                        location.href = URLs.loginAccount()
-                    })
-                } catch (e) {
-                    alert(e)
-                }
+                newWordbook.saveToServer()
+                newWordbook.onLoad(() => {
+                    location.href = URLs.wordbookList()
+                })
+                newWordbook.onLoadFailed(() => {
+                    location.href = URLs.loginAccount()
+                })
             })
 
             // 질문 추가
             $("#add-qa").on('click', function (e) {
                 const $newQuestion = $("#new-question")
                 const $newAnswer = $("#new-answer")
-                let qa = $("#qa-item-template")
-                    .clone()
-                    .removeAttr("id", "qa-item-template")
-                    .removeClass("d-none")
-                    .addClass("qa")
-                    .appendTo("#qa-items")
-                // qa.find(".qa-no").text($(".qa").length)
-                qa.find(".qa-question").text($newQuestion.val())
-                qa.find(".qa-answer").text($newAnswer.val())
+                const $newItem = $('#qa-item-template').clone()
+                makeQaItem($newItem, $newQuestion.val(), $newAnswer.val())
+                $newItem.appendTo("#qa-items")
                 $newQuestion.val('').focus()
                 $newAnswer.val('')
             })
@@ -66,16 +55,17 @@
 
         // 질문 수정
         $(document.body).on("click", ".update-qa", function () {
-            var row = $(this).parents(".qa")
-            $("#new-question").val($(row).find(".qa-question").text()).focus()
-            $("#new-answer").val($(row).find(".qa-answer").text())
-            row.remove()
+            const $row = $(this).parents(".qa")
+            const qa = getQaItem($row)
+            $("#new-question").val(qa.question).focus()
+            $("#new-answer").val(qa.answer)
+            $row.remove()
         })
 
         // 질문 삭제
         $(document.body).on("click", ".delete-qa", function () {
-            var row = $(this).parents(".qa")
-            row.remove()
+            const $row = $(this).parents(".qa")
+            $row.remove()
         })
     </script>
 </head>
@@ -114,7 +104,7 @@
                 </tr>
                 </thead>
                 <tbody id="qa-items">
-                <tr id="qa-item-template" class="d-none">
+                <tr id="qa-item-template" style="display: none">
                     <!--                    <td>0</td>-->
                     <td class="qa-question" style="white-space:pre">Question</td>
                     <td class="qa-answer" style="white-space:pre">Answer</td>

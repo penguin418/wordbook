@@ -14,14 +14,23 @@
 <body>
 <script>
     // 초기화
+
+    const {URLs, CurrentWordbook} = wordbookService
+    const {getQaItem, getAllQaItems, makeQaItem} = UiHelper
+    const currentWordbook = new CurrentWordbook()
+    const curUrl = window.location.pathname.split('/')
+    const id = curUrl[curUrl.length - 2]
+    currentWordbook.findOne(parseInt(id))
+
     $(document).ready(function () {
-        const {URLs, Wordbooks} = wordbookService
         $('#wordbook-list-link').href = URLs.wordbookList()
         $('#new-wordbook-link').href = URLs.newWordbook()
 
+        // 아이템이 로드되면 화면에 출력
         currentWordbook.onLoad(() => {
                 console.log(currentWordbook)
 
+                // 제목 출력
                 if (currentWordbook.name) {
                     const $wordbookName = $('.wordbook-name')
                     document.title = currentWordbook.name + ' (editMode)'
@@ -29,22 +38,19 @@
                     $('#new-name').val(currentWordbook.name)
                 }
 
+                // 설명 출력
                 if (currentWordbook.description) {
                     const $wordbookDesc = $('.wordbook-description')
                     $wordbookDesc.text(currentWordbook.description)
                     $('#new-description').val(currentWordbook.description)
                 }
 
+                // 질문과 답 출력
                 if (currentWordbook.qaList) {
                     currentWordbook.qaList.forEach((item, idx) => {
-                        const newItem = $('#qa-item-template').clone()
-                        newItem.find('p.qa-question').text(item.question)
-                        newItem.find('p.qa-answer').text(item.answer)
-                        newItem.attr('data-qa-id', item.id)
-                        newItem.removeAttr('id')
-                        newItem.css('display', '')
-                        newItem.addClass("qa")
-                        $('#qa-items').append(newItem)
+                        const $newItem = $('#qa-item-template').clone()
+                        makeQaItem($newItem, item.question, item.answer, item.qa_id)
+                        $('#qa-items').append($newItem)
                     })
                     $('#qa-empty').remove()
                 }
@@ -57,25 +63,49 @@
             currentWordbook.setName($("#new-name").val())
             currentWordbook.setDescription($("#new-description").val())
 
-            $.each($(".qa"), function (index, qa) {
-                const question = $(qa).find(".qa-question").text()
-                const answer = $(qa).find(".qa-answer").text()
-                if ($(qa).attr('qa-id'))
-                    currentWordbook.addQA(question, answer, $(qa).attr('qa-id'))
-                else
-                    currentWordbook.addQA(question, answer)
-            })
+            const qaList = getAllQaItems()
+            currentWordbook.setQaList(qaList)
 
-            try {
-                currentWordbook.saveToServer()
-                    .then(response => {
-                        console.log(response)
-                        location.href = URLs.home()
-                    })
-            } catch (e) {
-                console.log(e)
-            }
+            currentWordbook.saveToServer()
+            currentWordbook.onLoad(()=>{
+                location.href = URLs.wordbookList()
+            })
+            currentWordbook.onLoadFailed(()=>{
+                console.log('failed')
+            })
         })
+
+
+        $("#add-qa").on('click', function (e) {
+            const $newQuestion = $("#new-question")
+            const $newAnswer = $("#new-answer")
+            const $newId = $("#new-id")
+
+            const $newItem = $('#qa-item-template').clone()
+            makeQaItem($newItem, $newQuestion.val(), $newAnswer.val(), $newId.val())
+            $('#qa-items').append($newItem)
+
+            $newQuestion.val('').focus()
+            $newAnswer.val('')
+            $newId.val('0')
+        })
+    })
+
+    // 질문 수정
+    $(document.body).on("click", ".update-qa", function () {
+        const $row = $(this).parents(".qa")
+        const qa = getQaItem($row)
+        $("#new-question").val(qa.question).focus()
+        $("#new-answer").val(qa.answer)
+        $("#new-id").val(qa.qa_id)
+        $row.remove()
+    })
+
+    // 질문 삭제
+    $(document.body).on("click", ".delete-qa", function () {
+        const $row = $(this).parents(".qa")
+        const qa = getQaItem($row)
+        $row.remove()
     })
 </script>
 <div class="container">
@@ -96,7 +126,7 @@
             </div>
             <div class="qa-creation-form mt-3">
                 <div class="form-group">
-                    <input type="hidden" id="new-id">
+                    <input type="hidden" id="new-id" value="0">
                     <label for="new-question">문제</label>
                     <input type="text" class="form-control" id="new-question" placeholder="문제">
                     <label for="new-answer">정답</label>

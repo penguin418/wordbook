@@ -31,9 +31,10 @@
         </ul>
     </div>
     <script>
+
         const onUI = function () {
+            const {getAccount} = wordbookService
             console.log('event onUI')
-            const {URLs, getAccount} = wordbookService
             const account = getAccount()
             if (!account.isLoggedIn()) {
                 console.log('log outed ', account.isLoggedIn())
@@ -57,7 +58,7 @@
             const {URLs, getAccount} = wordbookService
             const account = getAccount()
             account.logout()
-            account.onLoad(()=>{
+            account.onLoad(() => {
                 $("#logout").hide()
             })
         })

@@ -2,21 +2,28 @@ package penguin.wordbook.mapper;
 
 import static penguin.wordbook.controller.dto.WordbookDto.*;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import penguin.wordbook.controller.dto.QADto;
+import penguin.wordbook.domain.QA;
 import penguin.wordbook.domain.Wordbook;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN, uses = {QAMapper.class, AccountMapper.class})
-public interface WordbookMapper {
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Mapper(componentModel = "spring",
+        unmappedTargetPolicy = ReportingPolicy.WARN,
+        uses = {QAMapper.class, AccountMapper.class})
+public abstract class WordbookMapper {
+    @Autowired protected QAMapper qaMapper;
 
     @Mapping(target = "wordbookId", ignore = true)
-    public Wordbook mapToDetailDto(WordbookCreateDto dto);
+    public abstract Wordbook mapToDetailDto(WordbookCreateDto dto);
 
-    public Wordbook mapToDetailDto(WordbookUpdateDto dto);
-
-    public WordbookDetailDto mapToDetailDto(Wordbook entity);
+    @Mapping(target = "qaList", source = "qaList")
+    public abstract WordbookDetailDto mapToDetailDto(Wordbook entity);
 
     @Mapping(source = "wordbookId", target = "wordbookId")
-    public WordbookItemDto mapToItemDto(Wordbook entity);
+    public abstract WordbookItemDto mapToItemDto(Wordbook entity);
 }

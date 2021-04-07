@@ -23,7 +23,7 @@ import java.io.IOException;
 
 /**
  * JWT 토큰을 검사하고 로그인 되었을 경우 auth 정보 추가
- *  - OncePerRequestFilter 상속: request 시만 동작
+ * - OncePerRequestFilter 상속: request 시만 동작
  */
 @Component
 @AllArgsConstructor
@@ -34,8 +34,9 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     /**
      * 세션에 토큰이 있는 지 검사하고 데이터를 전달
-     * @param req {HttpServletRequest}
-     * @param res {HttpServletResponse}
+     *
+     * @param req         {HttpServletRequest}
+     * @param res         {HttpServletResponse}
      * @param filterChain {FilterChain}
      * @throws ServletException 서블릿 예외
      * @throws IOException
@@ -46,7 +47,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         final Cookie accessTokenCookie = CookieUtil.getCookie(req, JwtTokenUtil.ACCESS_TOKEN_NAME);
         String email = null;
-        if(accessTokenCookie != null) {
+        if (accessTokenCookie != null) {
             try {
                 final String accessToken = accessTokenCookie.getValue();
                 jwtTokenUtil.validateToken(accessToken);
@@ -56,17 +57,15 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 final String newAccessToken = getNewAccessTokenIfPossible(req, res);
                 if (newAccessToken != null)
                     email = jwtTokenUtil.getEmailFromToken(newAccessToken);
-            }catch (UnsupportedClassVersionError e){
+            } catch (UnsupportedClassVersionError e) {
                 // 이전 버전의 토큰이 발견됨, 삭제함
                 CookieUtil.deleteCookie(res, JwtTokenUtil.ACCESS_TOKEN_NAME);
                 CookieUtil.deleteCookie(res, JwtTokenUtil.REFRESH_TOKEN_NAME);
-            }
-            catch (Exception ignored) {
-                // 로그인 정보 없음
+            } catch (RuntimeException ignored) {
             }
         }
 
-        if (email != null){
+        if (email != null) {
             // 유저 정보를 auth 에 삽입
             final UserDetail userDetails = accountApiLogicService.loadUserByUsername(email);
             UsernamePasswordAuthenticationToken authentication
@@ -79,22 +78,32 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     /**
      * redis 에서 리프레시 토큰 확인 후 발급
+     *
      * @param req {HttpServletRequest}
      * @param res {HttpServletResponse}
      * @return
      */
-    private String getNewAccessTokenIfPossible(HttpServletRequest req, HttpServletResponse res){
+    private String getNewAccessTokenIfPossible(HttpServletRequest req, HttpServletResponse res) {
         final Cookie refreshTokenCookie = CookieUtil.getCookie(req, JwtTokenUtil.REFRESH_TOKEN_NAME);
         String accessToken = null;
-
-        if (refreshTokenCookie != null){
+        if (refreshTokenCookie != null) {
             // 레디스에서 리프레시 토큰 확인
-            final String refreshToken = refreshTokenCookie.getValue();
-            final String emailFromToken = jwtTokenUtil.getEmailFromToken(refreshToken);
-            String emailFromRedis = redisUtil.getData(refreshToken);
+            String emailFromToken = null;
+            String emailFromRedis = null;
+            try {
+                final String refreshToken = refreshTokenCookie.getValue();
+                emailFromToken = jwtTokenUtil.getEmailFromToken(refreshToken);
+                emailFromRedis = redisUtil.getData(refreshToken);
+            } catch (ExpiredJwtException | UnsupportedClassVersionError e){
+                CookieUtil.deleteCookie(res, JwtTokenUtil.ACCESS_TOKEN_NAME);
+                CookieUtil.deleteCookie(res, JwtTokenUtil.REFRESH_TOKEN_NAME);
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+                return null;
+            }
 
             // 리프레시 토큰이 유효하면 재발급
-            if (emailFromToken != null && emailFromToken.equals(emailFromRedis)){
+            if (emailFromToken != null && emailFromToken.equals(emailFromRedis)) {
                 final UserDetail userDetails = accountApiLogicService.loadUserByUsername(emailFromToken);
                 accessToken = jwtTokenUtil.issueAccessToken(userDetails);
                 CookieUtil.addCookie(res, JwtTokenUtil.ACCESS_TOKEN_NAME, accessToken, JwtTokenUtil.ACCESS_EXPIRATION_MS);

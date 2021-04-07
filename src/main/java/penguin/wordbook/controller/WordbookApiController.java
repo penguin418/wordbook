@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.oxm.ValidationFailureException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +34,8 @@ public class WordbookApiController {
      * @throws JsonProcessingException
      */
     @PostMapping("/api/wordbooks")
-    public ResponseEntity<WordbookDetailDto> PostWordbookCreate(@RequestBody WordbookCreateDto wordbook, Authentication authentication) throws JsonProcessingException {
+    public ResponseEntity<WordbookDetailDto> PostWordbookCreate(@RequestBody WordbookCreateDto wordbook, Authentication authentication)
+            throws ValidationFailureException, JsonProcessingException {
         UserDetail userDetail = (UserDetail)authentication.getPrincipal();
         UserDetailUtil.validateUserInfo(userDetail, wordbook.getAccount());
 
@@ -62,7 +64,7 @@ public class WordbookApiController {
      * @return
      */
     @GetMapping("/api/wordbooks/{id}")
-    public ResponseEntity<WordbookDetailDto> GetWordbookUpdate(@PathVariable(value = "id") Long id) {
+    public ResponseEntity<WordbookDetailDto> GetWordbookUpdate(@PathVariable(value = "id") Long id) throws EntityNotFoundException{
         WordbookDetailDto dto = wordbookService.findOne(id);
         return ResponseEntity.ok(dto);
     }
@@ -76,11 +78,11 @@ public class WordbookApiController {
      * @throws JsonProcessingException
      */
     @PostMapping("/api/wordbooks/{id}")
-    public ResponseEntity<?> PostWordbookUpdate(@PathVariable(value = "id") Long id, @RequestBody WordbookUpdateDto wordbook) throws JsonProcessingException {
+    public ResponseEntity<WordbookDetailDto> PostWordbookUpdate(@PathVariable(value = "id") Long id, @RequestBody WordbookUpdateDto wordbook) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         System.out.println(objectMapper.writeValueAsString(wordbook));
-        wordbookService.update(wordbook);
-        return ResponseEntity.ok().build();
+        WordbookDetailDto response = wordbookService.update(wordbook);
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -108,6 +110,4 @@ public class WordbookApiController {
     public ErrorType entityNotFoundException(Exception e) {
         return ErrorType.WordbookNotFound;
     }
-
-
 }

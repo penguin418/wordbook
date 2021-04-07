@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
@@ -68,7 +69,8 @@
 
         // 삭제 버튼
         $(".delete-wordbook").on("click", function () {
-            currentWordbook.deleteFromServer().then(() => {
+            currentWordbook.deleteFromServer()
+            currentWordbook.onLoad(() => {
                 location.href = URLs.wordbookList()
             })
         })
