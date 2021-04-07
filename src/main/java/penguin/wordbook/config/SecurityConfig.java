@@ -67,7 +67,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     /**
      * 웹 필터링 (http 필터링 이전))
      * - js, css, image 등 static resources (js, css, images 등 static 폴더 항목) 제외
-     *
+     * - swagger 관련 항목 제외
      * @param web {WebSecurity}
      */
     @Override
@@ -75,7 +75,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         web
                 .ignoring()
                 .mvcMatchers("/index.html")
-                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+                .antMatchers("/v2/api-docs",
+                "/configuration/ui",
+                "/swagger-resources/**",
+                "/configuration/security",
+                "/swagger-ui.html",
+                "/webjars/**");
     }
 
     /**
@@ -88,8 +94,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable().authorizeRequests()
+                .antMatchers(HttpMethod.GET, "/wordbooks/create").hasRole("USER")
+                .antMatchers(HttpMethod.POST, "/api/wordbooks").hasRole("USER")
                 .antMatchers("/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/wordbooks").hasRole("USER")
                 .anyRequest().authenticated();
         http.sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);

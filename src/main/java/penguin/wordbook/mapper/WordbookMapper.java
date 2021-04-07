@@ -13,12 +13,10 @@ public interface WordbookMapper {
     @Mapping(target = "wordbookId", ignore = true)
     public Wordbook mapToDetailDto(WordbookCreateDto dto);
 
-    @Mapping(source = "id", target = "wordbookId")
     public Wordbook mapToDetailDto(WordbookUpdateDto dto);
 
-    @Mapping(source = "wordbookId", target = "id")
     public WordbookDetailDto mapToDetailDto(Wordbook entity);
 
-    @Mapping(source = "wordbookId", target = "id")
+    @Mapping(source = "wordbookId", target = "wordbookId")
     public WordbookItemDto mapToItemDto(Wordbook entity);
 }

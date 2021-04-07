@@ -3,6 +3,7 @@ package penguin.wordbook.service;
 import static penguin.wordbook.controller.dto.AccountDto.*;
 
 import lombok.AllArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class AccountService implements UserDetailsService {
      * @param accountCreateDto {AccountCreateDto} 가입 요청
      * @return AccountResponseDto 가입 정보
      */
-    public AccountInfoDto create(AccountCreateDto accountCreateDto) throws EntityExistsException {
+    public AccountInfoDto create(AccountCreateDto accountCreateDto) throws DuplicateKeyException {
 
         // 검증
         validateDuplicateAccountNickname(accountCreateDto.getNickname());
@@ -46,11 +47,11 @@ public class AccountService implements UserDetailsService {
      * TODO: 가입 중 확인, 미구현시 private 으로 다시 바꿀 것
      *
      * @param nickname {String} 닉네임
-     * @throws EntityExistsException 중복된 닉네임
+     * @throws DuplicateKeyException 중복된 닉네임
      */
     public void validateDuplicateAccountNickname(final String nickname) {
         accountRepository.findByNickname(nickname).ifPresent(account -> {
-            throw new EntityExistsException("존재하는 닉네임");
+            throw new DuplicateKeyException("nickname");
         });
     }
 
@@ -60,11 +61,11 @@ public class AccountService implements UserDetailsService {
      * TODO: 가입 중 확인, 미구현시 private 으로 다시 바꿀 것
      *
      * @param email {String} 이메일
-     * @throws EntityExistsException 중복된 이메일
+     * @throws DuplicateKeyException 중복된 이메일
      */
     public void validateDuplicateAccountEmail(final String email) {
         accountRepository.findByEmail(email).ifPresent(account -> {
-            throw new EntityExistsException("존재하는 이메일");
+            throw new DuplicateKeyException("email");
         });
     }
 
