@@ -11,9 +11,11 @@ import lombok.Getter;
 public enum ErrorType {
     NicknameExists(1001, "이미 사용중인 닉네임입니다"),
     EmailExists(1002, "이미 사용중인 이메일입니다"),
-    AccountNotFound(1003, "존재하지 않는 account_id 입니다"),
+    AccountNotFound(1003, "존재하지 않는 account 입니다"),
     PasswordDoesNotMatch(1004,"비밀번호가 일치하지 않습니다"),
-    UsernameNotFound(1005, "유저를 찾을 수 없습니다");
+    UsernameNotFound(1005, "유저를 찾을 수 없습니다"),
+
+    WordbookNotFound(2001, "존재하지 않는 wordbook 입니다");
     private final Integer code;
     private final String message;
 }
