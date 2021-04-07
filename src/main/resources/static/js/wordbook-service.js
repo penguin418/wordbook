@@ -145,10 +145,17 @@ const wordbookService = (function () {
 
         constructor() {
             super()
+            this.account = {}
             this.id = 0
             this.name = ''
             this.description = ''
             this.qaList = []
+        }
+
+        setAccount(account) {
+            this.account.account_id = account.account_id
+            this.account.nickname = account.nickname
+            this.account.email = account.email
         }
 
         /**
@@ -192,6 +199,7 @@ const wordbookService = (function () {
             if (this.qaList.length < 1) {
                 throw new EmptyWordbookException()
             }
+            super.reportProcessing()
             return fetch('/api/wordbooks', {
                 method: "POST",
                 headers: {
@@ -200,8 +208,20 @@ const wordbookService = (function () {
                 body: JSON.stringify({
                     name: this.name,
                     description: this.description,
-                    qa_list: this.qaList
+                    qa_list: this.qaList,
+                    account: this.account
                 }),
+            }).then((response) => {
+                if (!response.ok) {
+                    throw new Error(response.statusText)
+                }
+                return response.json()
+            }).then(data => {
+                console.log(data)
+                super.reportSuccess()
+            }).catch((error) => {
+                console.log(error)
+                super.reportFail()
             })
         }
     }
@@ -212,8 +232,6 @@ const wordbookService = (function () {
      * @classdesc 각 변수를 채운뒤, saveToServer() 메소드를 통해 서버에 저장합니다
      */
     const CurrentWordbook = class extends NewWordbook {
-        loading = false
-        onLoadFunction = null
 
         /**
          * 서버에서 하나의 wordbook을 찾아옵니다
@@ -239,6 +257,9 @@ const wordbookService = (function () {
                 this.name = data.name
                 this.description = data.description
                 this.qaList = data.qa_list
+                this.account.account_id = data.account.account_id
+                this.account.nickname = data.account.nickname
+                this.account.email = data.account.email
                 super.reportSuccess()
             }).catch((error) => {
                 console.log(error)
@@ -324,6 +345,8 @@ const wordbookService = (function () {
     const getAccount = function () {
         if (accountInstance === undefined) {
             accountInstance = new AccountClass()
+            if (accountInstance.isLoggedIn())
+                accountInstance.getMyAccount()
         }
         return accountInstance
     }
@@ -332,7 +355,7 @@ const wordbookService = (function () {
 
         constructor() {
             super()
-            this.id = ''
+            this.account_id = ''
             this.nickname = ''
             this.email = ''
             this.LOGGED_IN = 'WORDBOOK_LOGGED_IN'
@@ -386,7 +409,7 @@ const wordbookService = (function () {
                 return response.json()
             }).then((data) => {
                 console.log(data)
-                this.id = data.account_id
+                this.account_id = data.account_id
                 this.nickname = data.nickname
                 this.email = data.email
                 CookieUtil.setCookie(this.LOGGED_IN, true)
@@ -421,7 +444,7 @@ const wordbookService = (function () {
                 return response.json()
             }).then((data) => {
                 console.log(data)
-                this.id = data.account_id
+                this.account_id = data.account_id
                 this.nickname = data.nickname
                 this.email = data.email
                 super.reportSuccess()
@@ -438,7 +461,6 @@ const wordbookService = (function () {
                 body: JSON.stringify({
                     nickname, email, password, new_password
                 })
-
             }).then((response) => {
                 if (!response.ok) {
                     console.warn(response)
@@ -447,7 +469,7 @@ const wordbookService = (function () {
                 return response.json()
             }).then((data) => {
                 console.log(data)
-                this.id = data.account_id
+                this.account_id = data.account_id
                 this.nickname = data.nickname
                 this.email = data.email
                 super.reportSuccess()
@@ -474,6 +496,6 @@ function EmptyWordbookException() {
 }
 
 EmptyWordbookException.prototype.toString = function () {
-    return 'At least one QA must be included'
+    return '적어도 하나의 문제/정답이 들어가야 합니다'
 }
 
