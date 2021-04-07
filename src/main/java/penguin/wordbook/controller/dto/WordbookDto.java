@@ -51,8 +51,6 @@ public class WordbookDto {
 
         private AccountInfoDto account;
 
-        private AccountInfoDto account;
-
         private String name;
 
         private String description;
@@ -74,8 +72,6 @@ public class WordbookDto {
 
         private AccountInfoDto account;
 
-        private AccountInfoDto account;
-
         private String name;
 
         private String description;
@@ -91,8 +87,6 @@ public class WordbookDto {
     public static class WordbookItemDto {
 
         private Long wordbookId;
-
-        private AccountInfoDto account;
 
         private AccountInfoDto account;
 

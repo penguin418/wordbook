@@ -20,7 +20,7 @@
             wordbooks.contents.forEach(item => {
                 console.log(item.name)
                 const newItem = $('#wordbooks-item-template').clone()
-                newItem.attr('href', URLs.wordbookItem(item.id))
+                newItem.attr('href', URLs.wordbookItem(item.wordbook_id))
                 newItem.children('h5.wordbook-name').text(item.name)
                 newItem.children('h5.wordbook-description').text(item.description)
                 newItem.removeAttr('id')

@@ -108,6 +108,4 @@ public class WordbookApiController {
     public ErrorType entityNotFoundException(Exception e) {
         return ErrorType.WordbookNotFound;
     }
-
-
 }
