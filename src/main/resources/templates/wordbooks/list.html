@@ -1,19 +1,10 @@
 <!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>Wordbook List</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-            integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-            crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-            crossorigin="anonymous"></script>
-    <script src="https://kit.fontawesome.com/67f60ca045.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/js/wordbook-service.js"></script>
+    <th:block th:replace="fragments/common-import :: common-import"></th:block>
+    <link rel="stylesheet" href="/css/middle-aligned-table.css">
     <script>
         const {URLs, Wordbooks} = wordbookService
         const wordbooks = new Wordbooks()
@@ -26,9 +17,9 @@
             wordbooks.onLoad(() => {
                 console.log(wordbooks)
                 wordbooks.contents.forEach(item => {
-                    console.log(item.name)
+                    console.log(item)
                     const newItem = $('#wordbooks-item-template').clone()
-                    newItem.attr('href', URLs.wordbookItem(item.id))
+                    newItem.attr('href', URLs.wordbookItem(item.wordbook_id))
                     newItem.children('h5.wordbook-name').text(item.name)
                     newItem.children('h5.wordbook-description').text(item.description)
                     newItem.removeAttr('id')
@@ -41,31 +32,16 @@
 </head>
 <body>
 <div class="container">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <h1>단어장 서비스</h1>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" id="wordbook-list-link" href="/wordbooks/list">홈</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="new-wordbook-link" href="/wordbooks/create">새로운 단어장 만들기<span
-                            class="sr-only">(current)</span></a>
-                </li>
-            </ul>
-        </div>
-    </nav>
+    <!--    네베게이션-->
+    <div th:replace="/fragments/nav.html :: fragment-nav"></div>
+
     <div class="row justify-content-center">
         <div class="col-8">
+            <a href="/wordbooks/create" class="list-group-item">
+                <h5>새로운 단어장 만들기</h5>
+            </a>
             <div class="list-group">
-                <a href="/wordbooks/create" class="list-group-item">
-                    <h5>새로운 단어장 만들기</h5>
-                </a>
                 <a class="list-group-item hidden" id="wordbooks-item-template">
                     <h5 class="wordbook-name"></h5>
                     <h5 class="wordbook-description"></h5>

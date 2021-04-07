@@ -1,34 +1,42 @@
 package penguin.wordbook.domain;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import lombok.*;
 
 import javax.persistence.*;
-import java.util.ArrayList;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 @Entity(name = "wordbook")
 @Getter
 @Setter
+@Builder(builderClassName = "WordbookBuilder")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Wordbook {
+public class Wordbook implements Serializable {
 
     @Id
-    @Column(name = "wordbook_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long wordbookId;
+
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
 
     private String name;
 
     private String description;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<QA> qaList = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "wordbook")
+    private Set<QA> qaList = new HashSet<>();
+
+    public void setQaList(Set<QA> qaList){
+        this.qaList.clear();
+        for (QA qa: qaList){
+            qa.setWordbook(this);
+        }
+        this.qaList.addAll(qaList);
+    }
 }

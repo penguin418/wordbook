@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block th:replace="fragments/common-import :: common-import"></th:block>
+</head>
+<body>
+<script>
+    const {URLs, MyWordbooks} = wordbookService
+    const wordbooks = new MyWordbooks()
+    wordbooks.findMyWordbooks()
+
+    $(document).ready(function (message) {
+        $('#wordbook-list-link').href = URLs.wordbookList()
+        $('#new-wordbook-link').href = URLs.newWordbook()
+
+        wordbooks.onLoad(() => {
+            console.log(wordbooks)
+            wordbooks.contents.forEach(item => {
+                console.log(item.name)
+                const newItem = $('#wordbooks-item-template').clone()
+                newItem.attr('href', URLs.wordbookItem(item.wordbook_id))
+                newItem.children('h5.wordbook-name').text(item.name)
+                newItem.children('h5.wordbook-description').text(item.description)
+                newItem.removeAttr('id')
+                newItem.removeClass('hidden')
+                $('.list-group').append(newItem)
+            })
+        })
+        wordbooks.onLoadFailed(()=>{
+            console.log('failed')
+        })
+    })
+</script>
+<div class="container">
+
+    <!--    네베게이션-->
+    <div th:replace="/fragments/nav.html :: fragment-nav"></div>
+
+    <div class="row justify-content-center">
+        <div class="col-8">
+            <a href="/wordbooks/create" class="list-group-item">
+                <h5>새로운 단어장 만들기</h5>
+            </a>
+            <div class="list-group">
+                <a class="list-group-item hidden" id="wordbooks-item-template">
+                    <h5 class="wordbook-name"></h5>
+                    <h5 class="wordbook-description"></h5>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
