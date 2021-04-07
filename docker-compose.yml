@@ -4,3 +4,17 @@ services:
     image: redis
     ports:
     - 6379:6379
+  db_on_mysql:
+    image: mysql
+    restart: always
+    ports:
+    - 13306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_USER: "word"
+      MYSQL_PASSWORD: "book"
+      MYSQL_DATABASE: "wordbook"
+    command:
+    - --lower_case_table_names=1
+    - --character-set-server=utf8mb4
+    - --collation-server=utf8mb4_unicode_ci
