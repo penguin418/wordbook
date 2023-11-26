@@ -4,6 +4,7 @@ import static penguin.wordbook.controller.dto.WordbookDto.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -16,7 +17,6 @@ import penguin.wordbook.config.UserDetail;
 import penguin.wordbook.service.WordbookService;
 import penguin.wordbook.util.UserDetailUtil;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
 import static java.lang.Long.parseLong;
@@ -64,7 +64,7 @@ public class WordbookApiController {
      * @return
      */
     @GetMapping("/api/wordbooks/{id}")
-    public ResponseEntity<WordbookDetailDto> GetWordbookUpdate(@PathVariable(value = "id") Long id) throws EntityNotFoundException{
+    public ResponseEntity<WordbookDetailDto> GetWordbookUpdate(@PathVariable(value = "id") Long id) throws EntityNotFoundException {
         WordbookDetailDto dto = wordbookService.findOne(id);
         return ResponseEntity.ok(dto);
     }

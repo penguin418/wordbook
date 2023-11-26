@@ -2,7 +2,6 @@ package penguin.wordbook.mapper;
 
 import static penguin.wordbook.controller.dto.QADto.*;
 
-import org.hibernate.criterion.DetachedCriteria;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

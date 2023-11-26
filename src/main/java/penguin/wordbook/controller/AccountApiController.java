@@ -3,6 +3,10 @@ package penguin.wordbook.controller;
 import static penguin.wordbook.controller.dto.AccountDto.*;
 import static penguin.wordbook.controller.dto.WordbookDto.*;
 
+import jakarta.persistence.EntityExistsException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -21,10 +25,6 @@ import penguin.wordbook.util.CookieUtil;
 import penguin.wordbook.util.JwtTokenUtil;
 import penguin.wordbook.util.RedisUtil;
 
-import javax.persistence.EntityExistsException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**

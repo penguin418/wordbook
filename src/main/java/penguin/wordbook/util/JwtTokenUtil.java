@@ -1,11 +1,13 @@
 package penguin.wordbook.util;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import penguin.wordbook.config.UserDetail;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.crypto.SecretKey;
 import java.util.Date;
 
 
@@ -17,7 +19,7 @@ public class JwtTokenUtil {
     public final static Long ACCESS_EXPIRATION_MS = 864000L;
     public final static Long REFRESH_EXPIRATION_MS = 86400000L;
 
-    private final static String SECRET_KEY = "secret";
+    private final static String SECRET_KEY = "secret.secret.secret.secret.secret.";
     private final static String SUBJECT_NAME = "penguin.wordbook.v1";
     private final static String CLAIM_ACCOUNT_ID = "id";
     private final static String CLAIM_NICKNAME = "nickname";
@@ -40,14 +42,14 @@ public class JwtTokenUtil {
         return issue(userDetails, REFRESH_EXPIRATION_MS);
     }
 
+    SecretKey secretKey = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     // 자세한 정보는 https://jwt.io
     public String issue(UserDetail userDetails, Long expiration) {
         // => 헤더, 페이로드, 키 (https://velopert.com/2389) (https://tools.ietf.org/html/rfc7519#section-4)
         return Jwts.builder()
                 // 헤더 - 타입(typ)
-                .setHeaderParam("typ", "JWT")
-                // 페이로드 - 서브젝트(sub)
-                .setSubject(SUBJECT_NAME)
+                .header().add("typ", "JWT").and()
+                .subject(SUBJECT_NAME)
                 // 페이로드 - 유니큐한 식별자
                 // https://stackoverflow.com/questions/47908754/setting-two-subject-in-jwt-token-generation-in-spring-boot-microservice
                 .claim(CLAIM_ACCOUNT_ID, userDetails.getAccountId())
@@ -55,10 +57,8 @@ public class JwtTokenUtil {
                 .claim(CLAIM_EMAIL, userDetails.getUsername())
 //                .claim("account_authorities", userDetails.getAuthorities())
                 // 키 - alg, 키
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
-                // 만료시간 (exp)
-                // 2020-02-27 penguin 만료시간 하루로 늘림
-                .setExpiration(new Date(System.currentTimeMillis() + expiration)) // 만료시간
+                .signWith(secretKey)
+                .expiration(new Date(System.currentTimeMillis() + expiration)) // 만료시간
                 .compact();
     }
     /**
@@ -69,9 +69,9 @@ public class JwtTokenUtil {
      */
     public Long getAccountId(String token) {
         Claims claim = Jwts.parser()
-                .setSigningKey(SECRET_KEY)
-                .parseClaimsJws(token)
-                .getBody();
+                .verifyWith(secretKey)
+                .build().parseSignedClaims(token)
+                .getPayload();
         return claim.get(CLAIM_ACCOUNT_ID, Long.class);
     }
 
@@ -83,9 +83,9 @@ public class JwtTokenUtil {
      */
     public String getNickname(String token) {
         Claims claim = Jwts.parser()
-                .setSigningKey(SECRET_KEY)
-                .parseClaimsJws(token)
-                .getBody();
+                .verifyWith(secretKey)
+                .build().parseSignedClaims(token)
+                .getPayload();
         return claim.get(CLAIM_NICKNAME, String.class);
     }
 
@@ -97,9 +97,9 @@ public class JwtTokenUtil {
      */
     public String getEmailFromToken(String token) {
         Claims claim = Jwts.parser()
-                .setSigningKey(SECRET_KEY)
-                .parseClaimsJws(token)
-                .getBody();
+                .verifyWith(secretKey)
+                .build().parseSignedClaims(token)
+                .getPayload();
         return claim.get(CLAIM_EMAIL, String.class);
     }
 
@@ -113,11 +113,10 @@ public class JwtTokenUtil {
         if (!token.equals("")) {
             try {
                 assert Jwts.parser()
-                        .setSigningKey(SECRET_KEY)
-                        .parseClaimsJws(token).
-                        getBody().
-                        getSubject().
-                        equals(SUBJECT_NAME);
+                        .verifyWith(secretKey)
+                        .build().parseSignedClaims(token)
+                        .getPayload()
+                        .equals(SUBJECT_NAME);
             } catch (SignatureException e) {
                 throw new SignatureException("사인이 유효하지 않음");
             } catch (MalformedJwtException e) {

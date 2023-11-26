@@ -2,6 +2,8 @@ package penguin.wordbook.service;
 
 import static penguin.wordbook.controller.dto.AccountDto.*;
 
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,8 +15,6 @@ import penguin.wordbook.config.UserDetail;
 import penguin.wordbook.mapper.AccountMapper;
 import penguin.wordbook.repository.AccountRepository;
 
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityNotFoundException;
 
 @Service
 @Transactional
@@ -85,7 +85,7 @@ public class AccountService implements UserDetailsService {
      * @return AccountInfoDto 가입 정보
      * @throws EntityExistsException 이미 존재하는 이메일, 닉네임으로 설정하려 할때 발생
      */
-    public AccountInfoDto update(final AccountUpdateDto accountUpdateDto) throws EntityExistsException{
+    public AccountInfoDto update(final AccountUpdateDto accountUpdateDto) throws EntityExistsException {
 
         validateDuplicateAccountNickname(accountUpdateDto.getNickname());
         validateDuplicateAccountEmail(accountUpdateDto.getEmail());
