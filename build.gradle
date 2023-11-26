@@ -1,45 +1,51 @@
+// 최상위 build.gradle
 plugins {
-	id 'org.springframework.boot' version '3.1.5'
-	id 'io.spring.dependency-management' version '1.1.3'
-	id 'java'
 }
 
-group = 'penguin'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+ext{
+	javaVersion = JavaVersion.VERSION_17
 
-repositories {
-	mavenCentral()
-}
+	// plugin version
+	springbootPluginVersion = '3.1.5'
+	springDependencyManagementPluginVersion = '1.1.3'
 
-ext {
+	// dependency version
+	junitVersion = '5.7.0'
+
 	mapstructVersion = "1.4.2.Final"
 	lombokVersion = "1.18.22"
 	lombokMapstructBindingVersion = "0.2.0"
 }
 
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	runtimeOnly 'com.h2database:h2'
-	implementation group: 'org.mindrot', name: 'jbcrypt', version: '0.3m'
-
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'io.jsonwebtoken:jjwt:0.12.3'
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
-
-
-	testImplementation 'org.springframework.security:spring-security-test'
-	implementation "org.mapstruct:mapstruct:${mapstructVersion}", "org.projectlombok:lombok:${lombokVersion}"
-	testImplementation 'junit:junit:4.13.1'
-	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}", "org.projectlombok:lombok:${lombokVersion}", "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
+allprojects {
+	group = 'penguin'
+	version = '0.0.1-SNAPSHOT'
 }
 
-test {
-	useJUnitPlatform()
+subprojects {
+	apply plugin: 'java'
+
+	sourceCompatibility = javaVersion
+	targetCompatibility = javaVersion
+
+	repositories {
+		mavenCentral()
+	}
+
+
+	dependencies {
+		// api: 외부 노출
+		// implementation: 내부 구현 전용
+		// compileOnly, annotationProcessor: 컴파일 전용
+		// testImplementation: 테스트 전용
+		testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+		testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+		implementation "org.mapstruct:mapstruct:${mapstructVersion}", "org.projectlombok:lombok:${lombokVersion}"
+		annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}", "org.projectlombok:lombok:${lombokVersion}", "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
+	}
+
+	test {
+		useJUnitPlatform()
+	}
 }

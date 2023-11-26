@@ -48,7 +48,7 @@ class JpaWordbookServiceTest {
 
         // when
         WordbookItemDto wb = dtos.get(0);
-        Long id = wb.getId();
+        Long id = wb.getWordbookId();
         wordbookService.removeById(id);
 
         // then
