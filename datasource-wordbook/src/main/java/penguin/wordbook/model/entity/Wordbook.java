@@ -1,13 +1,11 @@
-package penguin.wordbook.domain;
+package penguin.wordbook.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity(name = "wordbook")
@@ -22,9 +20,8 @@ public class Wordbook implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long wordbookId;
 
-    @ManyToOne
-    @JoinColumn(name = "account_id")
-    private Account account;
+    @Column(name = "account_id")
+    private Long accountId;
 
     private String name;
 

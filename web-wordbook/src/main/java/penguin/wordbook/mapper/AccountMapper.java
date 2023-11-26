@@ -5,7 +5,7 @@ import static penguin.wordbook.controller.dto.AccountDto.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
-import penguin.wordbook.domain.Account;
+import penguin.auth.model.entity.Account;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN)
 public interface AccountMapper {

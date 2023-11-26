@@ -10,15 +10,16 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import penguin.wordbook.domain.Account;
+import penguin.auth.config.DatasourceAuthConfiguration;
+import penguin.auth.dao.repository.AccountRepository;
+import penguin.auth.model.entity.Account;
 import penguin.wordbook.config.UserDetail;
 import penguin.wordbook.mapper.AccountMapper;
-import penguin.wordbook.repository.AccountRepository;
 
 
 @Service
-@Transactional
 @AllArgsConstructor
+@Transactional(transactionManager = DatasourceAuthConfiguration.TRANSACTION_MANAGER)
 public class AccountService implements UserDetailsService {
     private final AccountRepository accountRepository;
     private final AccountMapper accountMapper;

@@ -1,0 +1,21 @@
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.orm.jpa.JpaAutoConfiguration
+  datasource:
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:mem:localhost/~/auth
+    username: sa
+    hikari:
+      auto-commit: false
+      connection-test-query: SELECT 1
+      minimum-idle: 10
+      maximum-pool-size: 50
+      transaction-isolation: TRANSACTION_READ_COMMITTED
+      pool-name: datasource-wordbook-pool
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        hbm2ddl.auto: update

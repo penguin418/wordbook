@@ -12,7 +12,7 @@ import java.util.Date;
 
 
 @Component
-@PropertySource("classpath:application.properties")
+@PropertySource("classpath:application.yml")
 public class JwtTokenUtil {
     public final static String ACCESS_TOKEN_NAME = "ACCESS_TOKEN";
     public final static String REFRESH_TOKEN_NAME = "REFRESH_TOKEN";

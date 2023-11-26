@@ -1,7 +1,7 @@
 package penguin.wordbook.util;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.oxm.ValidationFailureException;
+
 import org.springframework.stereotype.Component;
 import penguin.wordbook.config.UserDetail;
 import penguin.wordbook.controller.dto.AccountDto;
@@ -16,5 +16,10 @@ public class UserDetailUtil {
             throw new ValidationFailureException("nickname");
         if (!userDetail.getUsername().equals(userInfo.getEmail()))
             throw new ValidationFailureException("email");
+    }
+
+    private static class ValidationFailureException extends RuntimeException {
+        public ValidationFailureException(String id) {
+        }
     }
 }

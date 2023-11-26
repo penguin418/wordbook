@@ -6,20 +6,21 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import penguin.wordbook.domain.QA;
-import penguin.wordbook.domain.Wordbook;
+import penguin.wordbook.config.DatasourceWordbookConfiguration;
+import penguin.wordbook.model.entity.QA;
+import penguin.wordbook.model.entity.Wordbook;
 import penguin.wordbook.mapper.QAMapper;
 import penguin.wordbook.mapper.WordbookMapper;
-import penguin.wordbook.repository.QARepository;
-import penguin.wordbook.repository.WordbookRepository;
+import penguin.wordbook.dao.repository.QARepository;
+import penguin.wordbook.dao.repository.WordbookRepository;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 @AllArgsConstructor
+@Transactional(transactionManager = DatasourceWordbookConfiguration.TRANSACTION_MANAGER)
 public class WordbookService {
 
     private final WordbookRepository wordbookRepository;
@@ -63,7 +64,7 @@ public class WordbookService {
     }
 
     public List<WordbookItemDto> findByAccountId(Long accountId) {
-        return wordbookRepository.findByAccountAccountId(accountId).stream().map(wordbookMapper::mapToItemDto).collect(Collectors.toList());
+        return wordbookRepository.findByAccountId(accountId).stream().map(wordbookMapper::mapToItemDto).collect(Collectors.toList());
     }
 
     /**

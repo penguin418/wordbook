@@ -4,13 +4,7 @@ import static penguin.wordbook.controller.dto.WordbookDto.*;
 
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import penguin.wordbook.controller.dto.QADto;
-import penguin.wordbook.domain.QA;
-import penguin.wordbook.domain.Wordbook;
-
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import penguin.wordbook.model.entity.Wordbook;
 
 @Mapper(componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.WARN,

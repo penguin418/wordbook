@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.oxm.ValidationFailureException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +34,7 @@ public class WordbookApiController {
      */
     @PostMapping("/api/wordbooks")
     public ResponseEntity<WordbookDetailDto> PostWordbookCreate(@RequestBody WordbookCreateDto wordbook, Authentication authentication)
-            throws ValidationFailureException, JsonProcessingException {
+            throws JsonProcessingException {
         UserDetail userDetail = (UserDetail)authentication.getPrincipal();
         UserDetailUtil.validateUserInfo(userDetail, wordbook.getAccount());
 

@@ -1,4 +1,4 @@
-package penguin.wordbook.domain;
+package penguin.wordbook.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

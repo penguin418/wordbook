@@ -1,3 +1,4 @@
 rootProject.name = 'wordbook'
 include 'web-wordbook'
-
+include 'datasource-wordbook'
+include 'datasource-auth'
