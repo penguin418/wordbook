@@ -2,18 +2,17 @@ package penguin.wordbook.service;
 
 import static penguin.wordbook.controller.dto.WordbookDto.*;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import penguin.wordbook.domain.QA;
 import penguin.wordbook.domain.Wordbook;
 import penguin.wordbook.mapper.QAMapper;
-import penguin.wordbook.mapper.QAMapperImpl;
 import penguin.wordbook.mapper.WordbookMapper;
 import penguin.wordbook.repository.QARepository;
 import penguin.wordbook.repository.WordbookRepository;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
